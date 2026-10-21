@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Salle de conseil PROUX AUDIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : bandeau marine (résumé du jour), puis le bureau : brief d'Alexandre, organigramme cliquable, fiche de l'agent ouverte en dessous avec tâches et échanges. */
+:root{
+  --navy:#0B1E3D; --orange:#EA580C; --teal:#0E7490;
+  --bg:#F3F5F9; --surface:#FFFFFF; --sunk:#E9EDF4; --fg:#14213A; --muted:#5A6781; --line:#D9E0EB;
+  --band:#0B1E3D; --band-fg:#F1F4F9; --band-muted:#A9B6CC;
+  --accent:#EA580C; --accent-soft:#FDEBDF; --teal-soft:#DDF0F4; --navy-soft:#E1E7F2;
+  --ok:#15803D; --ok-soft:#DCF2E3; --warn:#B45309; --warn-soft:#FBEED7; --crit:#B91C1C; --crit-soft:#FBE1E1;
+  --on-accent:#FFFFFF;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A1322; --surface:#111D31; --sunk:#0D182A; --fg:#E6ECF5; --muted:#93A1B8; --line:#24334C;
+  --band:#060E1B; --band-fg:#E6ECF5; --band-muted:#8C9AB2;
+  --accent:#F97B3D; --accent-soft:#3A2214; --teal-soft:#0F2E37; --navy-soft:#16243C;
+  --ok:#4ADE80; --ok-soft:#12301E; --warn:#FBBF24; --warn-soft:#33270E; --crit:#F87171; --crit-soft:#3A1717;
+  --on-accent:#140A04; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1322; --surface:#111D31; --sunk:#0D182A; --fg:#E6ECF5; --muted:#93A1B8; --line:#24334C;
+  --band:#060E1B; --band-fg:#E6ECF5; --band-muted:#8C9AB2;
+  --accent:#F97B3D; --accent-soft:#3A2214; --teal-soft:#0F2E37; --navy-soft:#16243C;
+  --ok:#4ADE80; --ok-soft:#12301E; --warn:#FBBF24; --warn-soft:#33270E; --crit:#F87171; --crit-soft:#3A1717;
+  --on-accent:#140A04; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--band);color:var(--band-fg)}
+header.band .wrap{padding-block:22px 18px;display:grid;gap:14px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,4vw,30px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand h1 .dot{color:var(--orange)}
+.brand .meta{font-family:var(--f-mono);font-size:12px;color:var(--band-muted)}
+.kpis{display:flex;gap:10px;flex-wrap:wrap}
+.kpi{border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:8px 12px;display:flex;gap:8px;align-items:baseline;background:transparent;color:var(--band-fg);font:inherit;cursor:pointer}
+.kpi b{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--band-muted)}
+.kpi.hot b{color:var(--orange)}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:12px 12px 9px;font:500 14px var(--f-body);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tab .n{font-family:var(--f-mono);font-size:12px;margin-left:4px}
+main .wrap{padding-block:20px 56px;display:grid;gap:22px}
+section{display:grid;gap:12px;min-width:0}
+.notice{border-radius:8px;padding:12px 14px;background:var(--warn-soft);border:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.notice.crit{background:var(--crit-soft)}
+.notice p{margin:0;flex:1 1 260px;min-width:0}
+h2{font-family:var(--f-display);font-size:20px;font-weight:600;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-size:16px;font-weight:600;margin:0}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:13px;margin:0}
+.eyebrow{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.list{display:grid;gap:10px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:6px;min-width:0}
+.item.urgent{border-left:4px solid var(--accent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.title{font-weight:600}
+.small{font-size:13px;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+.pill{font-size:12px;font-weight:500;border-radius:999px;padding:2px 9px;background:var(--teal-soft);color:var(--teal)}
+.pill.attente,.pill.a_faire{background:var(--warn-soft);color:var(--warn)}
+.pill.bloque,.pill.non{background:var(--crit-soft);color:var(--crit)}
+.pill.clos,.pill.fait,.pill.oui{background:var(--ok-soft);color:var(--ok)}
+.pill.a_revoir{background:var(--warn-soft);color:var(--warn)}
+.prio{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.prio.p1{border-color:var(--accent);color:var(--accent)}
+.lock{font-size:12px;color:var(--crit);border:1px solid currentColor;border-radius:4px;padding:0 6px}
+.next{border-left:2px solid var(--teal);padding-left:10px}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+details p{margin:6px 0 0}
+.btn{font:500 13px var(--f-body);border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 11px;cursor:pointer}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.ok{color:var(--ok)} .btn.no{color:var(--crit)} .btn.re{color:var(--warn)}
+.btn[disabled]{opacity:.5;cursor:wait}
+.empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:16px}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0;width:100%;box-sizing:border-box}
+textarea{min-height:64px;resize:vertical}
+label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+
+/* Brief */
+.brief{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px}
+.brief .who{display:flex;gap:10px;align-items:center}
+.md{display:grid;gap:6px;max-width:72ch}
+.md p,.md ul{margin:0}
+.md ul{padding-left:18px;display:grid;gap:3px}
+.md h4{margin:6px 0 0;font-family:var(--f-display);font-size:15px}
+
+/* Organigramme */
+.org{display:grid;gap:14px;justify-items:center}
+.org .lvl{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;width:100%}
+.org .stem{width:2px;height:16px;background:var(--line)}
+.org .team{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;width:100%;border-top:2px solid var(--line);padding-top:14px}
+.ag{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:8px;text-align:left;font:inherit;color:inherit;cursor:pointer;min-width:0}
+.ag:hover{border-color:var(--teal)}
+.ag[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ag .top{display:flex;gap:10px;align-items:center}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:700 15px var(--f-display);flex:none;background:var(--navy-soft);color:var(--fg)}
+.av.c1{background:var(--accent-soft);color:var(--accent)} .av.c2{background:var(--teal-soft);color:var(--teal)}
+.ag .name{font-weight:600}
+.ag .role{font-size:13px;color:var(--muted);line-height:1.3}
+.ag .stats{display:flex;gap:10px;font-size:12px;color:var(--muted)}
+.ag .stats b{color:var(--fg);font-variant-numeric:tabular-nums}
+.ceo{background:var(--band);color:var(--band-fg);border-color:transparent;cursor:default}
+.ceo .role{color:var(--band-muted)}
+.ceo .av{background:var(--orange);color:var(--on-accent)}
+.adj{min-width:min(100%,280px)}
+
+/* Circuit */
+.circuit{display:flex;gap:6px;flex-wrap:wrap;counter-reset:s}
+.circuit li{list-style:none;background:var(--sunk);border-radius:6px;padding:6px 10px;font-size:13px;counter-increment:s}
+.circuit li::before{content:counter(s) " · ";font-family:var(--f-mono);color:var(--muted)}
+.circuit li.you{background:var(--accent-soft)}
+
+/* Panneau agent */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px}
+.panel .head{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.panel .head .av{width:48px;height:48px;font-size:18px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px}
+@media (max-width:760px){.cols{grid-template-columns:minmax(0,1fr)}}
+.fiche{display:grid;gap:8px;font-size:14px}
+.fiche ul{margin:0;padding-left:18px;display:grid;gap:3px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.chat{display:grid;gap:10px;align-content:start}
+.msgs{display:grid;gap:8px;max-height:420px;overflow-y:auto;padding-right:4px}
+.msg{border-radius:10px;padding:9px 12px;max-width:92%;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me{justify-self:end;background:var(--navy-soft)}
+.msg.ag2{justify-self:start;background:var(--sunk)}
+.msg.disc{justify-self:center;background:var(--teal-soft);max-width:100%}
+.links{margin:6px 0 0;padding-left:18px;display:grid;gap:3px;font-size:14px}
+.links a{color:var(--teal)}
+.msg .when{display:block;font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--f-mono)}
+.props{display:grid;gap:6px}
+.prop{border:1px dashed var(--teal);border-radius:8px;padding:8px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.prop span{flex:1 1 200px;min-width:0}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters .btn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:14px;z-index:20}
+.think{color:var(--muted);font-size:13px;font-style:italic}
+.stack{display:grid;gap:22px;min-width:0}
+.intro{gap:8px}
+.big{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,38px);letter-spacing:-.015em;margin:0}
+.lead{font-size:17px;max-width:62ch;margin:0;color:var(--fg)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start;min-width:0}
+.card p{margin:0}
+.card.wide{grid-column:1/-1}
+.card.agentcard{cursor:pointer;text-align:left;font:inherit;color:inherit}
+.card.agentcard:hover{border-color:var(--teal)}
+.card ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+.card .tbl{border:0}
+.steps{margin:0;padding-left:0;list-style:none;display:grid;gap:6px;font-size:14px}
+.steps li{padding-left:12px;border-left:2px solid var(--teal)}
+/* En-tête et espaces */
+.wrapw{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:8}
+.topin{max-width:1320px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{display:flex;gap:10px;align-items:center;margin-right:auto}
+.logo .mark{width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font:700 14px var(--f-display);letter-spacing:.02em}
+.logo strong{display:block;font-family:var(--f-display);font-size:19px;line-height:1.1}
+.logo small{color:var(--muted);font-size:12px}
+.views{display:flex;gap:6px;flex-wrap:wrap}
+.vbtn{font:500 14px var(--f-body);border:0;border-radius:8px;padding:9px 14px;background:transparent;color:var(--fg);cursor:pointer;display:flex;gap:6px;align-items:center}
+.vbtn[aria-selected="true"]{background:var(--navy);color:#fff}
+:root:not([data-theme="light"]) .vbtn[aria-selected="true"]{outline:1px solid var(--line)}
+.badge{background:var(--crit);color:#fff;border-radius:999px;font:600 11px var(--f-mono);padding:1px 7px}
+.clock{display:grid;text-align:right;font-size:12px;color:var(--muted)}
+.clock b{font:600 20px var(--f-display);color:var(--fg);font-variant-numeric:tabular-nums}
+.sync{max-width:1320px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));font:12px var(--f-mono);color:var(--muted)}
+nav.tabs{top:calc(env(safe-area-inset-top,0px) + 88px)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* La salle */
+.room{--room:#0E2347;--room2:#081530;--wood:#8A5A34;--wood2:#5E3B20;background:radial-gradient(120% 90% at 50% 0%,#1C3A6B 0%,var(--room) 45%,var(--room2) 100%);color:#EAF0FA;overflow:hidden}
+.roomin{max-width:1320px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:230px minmax(0,1fr) 270px;gap:16px;align-items:start;position:relative}
+.room::before{content:"";position:absolute}
+.services,.meeting{background:rgba(6,14,30,.72);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;backdrop-filter:blur(4px);position:relative;z-index:2}
+.services h3,.meeting h3{color:#fff;margin:0 0 8px}
+.services ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.services li button{width:100%;display:flex;justify-content:space-between;gap:8px;align-items:center;background:transparent;border:0;color:#DCE5F3;font:14px var(--f-body);padding:6px 4px;border-radius:6px;cursor:pointer;text-align:left}
+.services li button:hover{background:rgba(255,255,255,.08)}
+.services .cnt{font:12px var(--f-mono);background:rgba(255,255,255,.12);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.meeting .tag{float:right;font-size:11px;background:rgba(255,255,255,.14);border-radius:6px;padding:2px 7px}
+.meeting p{margin:4px 0;font-size:14px;color:#DCE5F3}
+.meeting .big2{font:600 18px var(--f-display);color:#fff;margin:2px 0 6px}
+.meeting small{color:#9FB0CC;font-size:12px}
+.stage{position:relative;min-height:390px;display:grid;justify-items:center;align-content:start}
+.roomtitle{text-align:center;position:relative;z-index:2}
+.roomtitle h2{color:#fff;font-size:30px;margin:0}
+.roomtitle p{margin:2px 0 0;color:#A9B8D2;font-size:14px}
+.seats{position:relative;z-index:3;display:flex;justify-content:center;align-items:flex-end;gap:10px;margin-top:14px;flex-wrap:nowrap;width:100%}
+.seat{display:grid;justify-items:center;gap:8px;background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0;min-width:0;flex:0 1 104px}
+.seat .card2{background:rgba(6,14,30,.85);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 8px;text-align:center;width:100%;box-sizing:border-box}
+.seat .nm{font-weight:600;font-size:14px;color:#fff;display:block}
+.seat .rl{font-size:11px;color:#B8C5DC;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .stt{font-size:11px;font-weight:600;display:flex;gap:5px;align-items:center;justify-content:center;color:#E6ECF5}
+.dot2{width:8px;height:8px;border-radius:50%;background:#94A3B8;flex:none}
+.dot2.on{background:#22C3A6}
+.pic{width:84px;height:84px;border-radius:50%;border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.45);position:relative;display:grid;place-items:center;font:700 26px var(--f-display);color:#fff;overflow:visible}
+.pic img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.pic .st{position:absolute;right:2px;bottom:2px;width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#94A3B8}
+.pic .st.on{background:#22C3A6}
+.seat.lead2{flex-basis:124px;margin-bottom:34px}
+.seat.lead2 .pic{width:116px;height:116px;font-size:34px}
+.seat[aria-pressed="true"] .pic{box-shadow:0 0 0 4px var(--orange),0 6px 18px rgba(0,0,0,.45)}
+.seat:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:8px}
+.g0{background:linear-gradient(135deg,#F97B3D,#C2410C)} .g1{background:linear-gradient(135deg,#22A6C4,#0E7490)} .g2{background:linear-gradient(135deg,#5B7DB8,#1E3A6E)} .g3{background:linear-gradient(135deg,#B98A5E,#7A5232)} .g4{background:linear-gradient(135deg,#7FA36B,#3F6B35)} .g5{background:linear-gradient(135deg,#A777C4,#6B3E8A)} .g6{background:linear-gradient(135deg,#D9A441,#9A6B12)} .g7{background:linear-gradient(135deg,#5FB3A5,#2C7468)}
+.table{position:relative;z-index:1;width:min(980px,120%);height:150px;margin-top:-58px;border-radius:50% 50% 0 0/100% 100% 0 0;background:radial-gradient(60% 120% at 50% 0%,var(--wood) 0%,var(--wood2) 85%);box-shadow:inset 0 10px 30px rgba(0,0,0,.35)}
+.tablein{position:absolute;left:50%;top:44px;transform:translateX(-50%);width:110px;height:44px;border-radius:50%;background:#1F4D3A;box-shadow:inset 0 3px 8px rgba(0,0,0,.5)}
+@media (max-width:1100px){.roomin{grid-template-columns:minmax(0,1fr)}.services,.meeting{order:2}.stage{order:1}.services ul{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+@media (max-width:760px){.seats{flex-wrap:wrap;gap:12px 8px}.seat{flex:0 0 96px}.seat.lead2{flex-basis:100%;margin-bottom:0}.table{display:none}.stage{min-height:0;padding-bottom:16px}}
+
+/* Objectif et bureau */
+.objcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:12px}
+.objrow{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2fr);gap:18px;align-items:center}
+@media (max-width:860px){.objrow{grid-template-columns:minmax(0,1fr)}}
+.objbig{font-size:16px}.objbig b{font:700 24px var(--f-display)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.tile{background:var(--navy-soft);border:0;border-radius:10px;padding:10px 12px;display:grid;gap:2px;text-align:left;font:inherit;color:var(--fg);cursor:pointer}
+.tile b{font:700 24px var(--f-display);font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--muted)}
+.tile.hot{background:var(--accent-soft)} .tile.hot b{color:var(--accent)}
+.tile.warn{background:var(--warn-soft)} .tile.ok{background:var(--ok-soft)}
+div.tile{cursor:default}
+.funnel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.fstep{display:grid;gap:4px}
+.fstep .lab{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.fstep .lab b{font:700 20px var(--f-display);color:var(--fg)}
+.bar{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden}.bar i{display:block;height:100%;background:var(--teal)}
+.alert{background:var(--warn-soft);border-radius:8px;padding:9px 12px;font-size:14px}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+@media (max-width:980px){.cols3{grid-template-columns:minmax(0,1fr)}}
+.num1{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font:600 13px var(--f-mono);flex:none}
+:root:not([data-theme="light"]) .num1{background:var(--teal)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;border-radius:6px;padding:1px 8px;background:var(--navy-soft)}
+.chip.late{background:var(--crit-soft);color:var(--crit)}
+.chip.dec{background:var(--teal-soft);color:var(--teal)}
+.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.acts .btn{text-align:center}
+.btn.go{background:var(--ok);border-color:var(--ok);color:#fff}
+.svc{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:4px}
+.who2{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.who2 .av{width:26px;height:26px;font-size:12px;flex:none}
+
+/* Barre de commande */
+.cmd{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--surface);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-shadow:0 -6px 20px rgba(11,30,61,.08)}
+.cmdin{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.cmdin textarea{min-height:40px;height:40px;resize:none}
+.cmdhint{max-width:1320px;margin:4px auto 0;font-size:12px;color:var(--muted)}
+@media (max-width:760px){.cmdin{grid-template-columns:minmax(0,1fr) auto}.cmdin select{grid-column:1/-1}.cmdin [data-brief]{display:none}}
+#v-fond main .wrap{padding-bottom:120px}
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.goal{background:var(--sunk);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
+.goal b{font-family:var(--f-display);font-size:24px;font-variant-numeric:tabular-nums;color:var(--accent)}
+.goal span{font-size:13px;color:var(--muted)}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+table.num td:last-child,table.num th:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.tot td{font-weight:600;background:var(--sunk)}
+
+html,body{margin:0}body{font-size:15px}[hidden]{display:none!important}*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.loginwrap{position:fixed;inset:0;z-index:50;background:radial-gradient(120% 90% at 50% 0%,#1C3A6B 0%,#0E2347 45%,#081530 100%);display:grid;place-items:center;padding:16px}
+.loginbox{background:var(--surface);border-radius:14px;padding:22px;display:grid;gap:12px;width:min(380px,100%);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,body.locked #v-fond{visibility:hidden}
+.btn.gpt{background:#E7F7EF;border-color:#BFE8D2;color:#0F5132}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="locked">
+<div id="login" class="loginwrap" hidden>
+  <form id="login-form" class="loginbox">
+    <div class="logo"><span class="mark">PA</span><div><strong>PROUX AUDIT</strong><small>Salle de conseil · accès réservé</small></div></div>
+    <label for="l-email">Adresse e-mail<input id="l-email" type="email" autocomplete="username" required value="audit.proux@outlook.com"></label>
+    <label for="l-pass">Mot de passe<input id="l-pass" type="password" autocomplete="current-password" required minlength="8"></label>
+    <button class="btn primary" type="submit">Se connecter</button>
+    <button class="btn" type="button" id="l-signup">Première fois : créer mon accès</button>
+    <p class="small" id="l-msg" role="status"></p>
+  </form>
+</div>
+
+<header class="top">
+  <div class="topin">
+    <div class="logo"><span class="mark">PA</span><div><strong>PROUX AUDIT</strong><small>Le réflexe cyber des TPE/PME</small></div></div>
+    <div class="views" role="tablist" aria-label="Espaces">
+      <button class="vbtn" data-view="salle" aria-selected="true">Salle de conseil</button>
+      <button class="vbtn" data-view="bureau" aria-selected="false">Mon bureau<span class="badge" id="b-bureau" hidden></span></button>
+      <button class="vbtn" data-view="fond" aria-selected="false">Plans, dossiers et consignes</button>
+    </div>
+    <div class="clock"><span id="today"></span><b id="time"></b></div>
+    <div class="row"><span class="small" id="who"></span><button class="btn" id="btn-refresh" type="button">Actualiser</button><button class="btn" id="btn-logout" type="button">Quitter</button></div>
+  </div>
+  <div class="sync"><span id="maj">Chargement de la base…</span></div>
+</header>
+<div class="wrapw"><div id="notice" hidden></div></div>
+
+<!-- SALLE DE CONSEIL -->
+<div id="v-salle">
+  <div class="room">
+    <div class="roomin">
+      <aside class="services"><h3>Services</h3><ul id="services"></ul></aside>
+      <div class="stage">
+        <div class="roomtitle"><h2>PROUX AUDIT</h2><p>Le réflexe cyber des TPE/PME</p></div>
+        <div class="seats" id="seats"></div>
+        <div class="table" aria-hidden="true"><div class="tablein"></div></div>
+      </div>
+      <aside class="meeting" id="meeting"></aside>
+    </div>
+  </div>
+  <div class="wrapw stack" style="padding-block:18px 120px">
+    <section class="objcard" id="objectif"></section>
+    <section id="agent-panel" hidden></section>
+    <section>
+      <div class="sec-head"><h2>Le fil de l'équipe</h2><p class="hint">Les derniers échanges avec les agents.</p></div>
+      <div class="list" id="fil"></div>
+    </section>
+  </div>
+</div>
+
+<!-- MON BUREAU -->
+<div id="v-bureau" hidden>
+  <div class="wrapw stack" style="padding-block:18px 120px">
+    <section class="objcard">
+      <div class="objrow">
+        <div><div class="eyebrow">Objectif an 1</div><div class="objbig"><b>195 960 €</b> HT au 31/03/2027 · 4 diagnostics par mois</div><div class="small">Scénario réaliste HubSpot de mars 2026, à recaler avec la nouvelle grille.</div></div>
+        <div class="tiles">
+          <button class="tile hot" data-scroll="atoi"><b id="k-avals">–</b><span>avals à trancher</span></button>
+          <button class="tile" data-scroll="jour"><b id="k-taches">–</b><span>tâches ouvertes</span></button>
+          <button class="tile warn" data-scroll="jour"><b id="k-retard">–</b><span>échéances ≤ 7 jours</span></button>
+          <button class="tile ok" data-view-go="fond" data-tab-go="dossiers"><b id="k-dossiers">–</b><span>dossiers actifs</span></button>
+          <div class="tile"><b id="k-leads">–</b><span>prospects détectés</span></div>
+          <div class="tile"><b id="k-clients">–</b><span>clients en abonnement</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="brief" id="brief-box">
+      <div class="sec-head"><div class="who"><div class="av c1">A</div><div><h3>Point du jour</h3><div class="small" id="brief-meta2">Par Alexandre, fondateur adjoint</div></div></div><button class="btn primary" type="button" data-brief>Demander le point du jour</button></div>
+      <div class="md" id="brief2">Alexandre résume ce qui presse, ce qui avance et ce qui attend ta décision.</div>
+    </section>
+    <div class="cols3">
+      <section id="atoi"><div class="sec-head"><h2>À toi, dans cet ordre</h2><span class="small" id="atoi-n"></span></div><div class="list" id="atoi-list"></div></section>
+      <section><div class="sec-head"><h2>Réponses</h2><span class="small">des agents</span></div><div class="list" id="reponses"></div></section>
+      <section id="jour"><div class="sec-head"><h2>Le bureau aujourd'hui</h2><span class="small">qui fait quoi</span></div><div class="list" id="jour-list"></div></section>
+    </div>
+  </div>
+</div>
+
+<!-- BARRE DE COMMANDE -->
+<form class="cmd" id="cmd">
+  <div class="cmdin">
+    <label class="sr" for="cmd-agent">Agent</label>
+    <select id="cmd-agent"></select>
+    <label class="sr" for="cmd-text">Message</label>
+    <textarea id="cmd-text" rows="1" maxlength="1500" placeholder="Pose une question à un agent ou donne une instruction…"></textarea>
+    <button class="btn primary" type="submit" id="cmd-send">Envoyer</button>
+    <button class="btn gpt" type="button" id="cmd-gpt">ChatGPT</button>
+    <button class="btn" type="button" data-brief>Point du jour</button>
+  </div>
+  <div class="cmdhint">Ctrl + Entrée pour envoyer. Les agents répondent à leur prochain passage (toutes les 2 heures, de 8 h à 20 h). ChatGPT ouvre un second avis gratuit avec ton abonnement.</div>
+</form>
+
+<div id="v-fond" hidden>
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-tab="plan" aria-selected="true">Business plan</button>
+    <button class="tab" role="tab" data-tab="bureau" aria-selected="false">Organigramme</button>
+    <button class="tab" role="tab" data-tab="pilotage" aria-selected="false">Pilotage<span class="n" id="n-avals"></span></button>
+    <button class="tab" role="tab" data-tab="fiches" aria-selected="false">Fiches de poste</button>
+    <button class="tab" role="tab" data-tab="conformite" aria-selected="false">Conformité</button>
+    <button class="tab" role="tab" data-tab="planning" aria-selected="false">Planning</button>
+    <button class="tab" role="tab" data-tab="dossiers" aria-selected="false">Dossiers<span class="n" id="n-dossiers"></span></button>
+    <button class="tab" role="tab" data-tab="outils" aria-selected="false">Outils</button>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+    <!-- BUSINESS PLAN -->
+    <div id="p-plan" class="stack" hidden>
+      <section class="intro">
+        <div class="eyebrow">PROUX AUDIT · SASU en création, immatriculation prévue en janvier 2027</div>
+        <h2 class="big">La machine PROUX AUDIT</h2>
+        <p class="lead">Un cabinet de conseil IT et de Diagnostic Cyber organisé comme une vraie entreprise. Tu es le directeur général. Chaque agent a sa fiche de poste. Chaque initiative passe par le circuit de décision avant ton aval.</p>
+      </section>
+      <div class="cards">
+        <article class="card"><h3>L'offre</h3><p><strong>Diagnostic Cyber PROUX</strong> en abonnement : diagnostic initial, retests périodiques et suivi de la remédiation, en trois formules. Un rapport pour le dirigeant, un rapport technique pour le prestataire.</p><p><strong>Chef de projet IT</strong> : coordination des projets d'infrastructure des clients (exemple : Clinique Éléance).</p><p class="small">Grille de prix en phase de test, choix après le retour de Mickaël PINSON.</p></article>
+        <article class="card"><h3>La cible</h3><p>TPE et PME de moins de 50 salariés, sans service informatique interne, Pays de la Loire d'abord. Secteurs déjà travaillés : santé (cliniques, cabinets), écoles, mairies, agroalimentaire, maisons de retraite.</p></article>
+        <article class="card"><h3>Les canaux</h3><p>Prospection directe à partir d'un test de surface public offert. Prestataires informatiques partenaires : licence de l'outil, rapports co-marqués, commission de 20 %. Distributeur envisagé : ALSO.</p></article>
+        <article class="card"><h3>L'avantage</h3><p><strong>L'indépendance</strong> : PROUX AUDIT n'est ni juge ni partie, il ne vend pas l'infogérance qu'il contrôle. 25 ans d'expérience réseau, un outil propre sans dépendance éditeur, des rapports lisibles par un dirigeant.</p></article>
+        <article class="card"><h3>Le modèle</h3><p>Abonnements récurrents, missions de chef de projet, licences pour les partenaires. Le diagnostic ouvre la porte : il montre les failles, la remédiation et le suivi suivent.</p></article>
+        <article class="card"><h3>L'organisation</h3><p>Toi, directeur général. Alexandre, fondateur adjoint. Sept agents avec fiche de poste. Une base Supabase en guise de cerveau commun, reliée plus tard à celle de RH Project pour le commercial, le site et l'esthétique.</p></article>
+        <article class="card wide"><h3>Les risques et parades</h3>
+          <div class="tbl"><table><thead><tr><th>Risque</th><th>Parade</th></tr></thead><tbody>
+          <tr><td>Crédibilité sans qualification officielle</td><td>Label ExpertCyber après immatriculation, RC Pro couvrant les tests, partenaire qualifié si besoin, rapports de test réels</td></tr>
+          <tr><td>Test réalisé sans autorisation</td><td>Mandat d'autorisation signé avant tout relevé ; avant mandat, uniquement des vérifications publiques</td></tr>
+          <tr><td>Prix mal calibrés</td><td>Avis de Mickaël PINSON, tarifs des concurrents, grilles ajustées pendant la phase de test</td></tr>
+          <tr><td>Dépendance à une seule personne</td><td>Base, fiches de poste et procédures écrites ; agents qui préparent, toi qui valides</td></tr>
+          <tr><td>Manque de temps</td><td>Brief du matin, file d'avals, comité du lundi : quelques minutes par jour</td></tr>
+          </tbody></table></div></article>
+        <article class="card wide"><h3>Les objectifs · an 1, scénario réaliste</h3>
+          <div class="goals">
+            <div class="goal"><b>195 960 €</b><span>chiffre d'affaires an 1 (jusqu'au 31/03/2027)</span></div>
+            <div class="goal"><b>3 900 €</b><span>d'abonnements par mois au 12e mois</span></div>
+            <div class="goal"><b>4</b><span>diagnostics par mois, 3 340 € en moyenne</span></div>
+            <div class="goal"><b>≈ 157 960 €</b><span>résultat cible, charges ≈ 38 000 €</span></div>
+          </div>
+          <p class="small">Source : objectifs HubSpot (flux 1, 2 et 3), établis en mars 2026, avant l'arrêt de SXIPHER et la nouvelle offre en abonnement. À recaler quand la grille de prix sera choisie.</p>
+        </article>
+        <article class="card wide"><h3>Le prévisionnel</h3>
+          <p class="small">Change les chiffres, le total se recalcule. Valeurs de départ : scénario réaliste HubSpot.</p>
+          <div class="calc">
+            <label for="c-missions">Diagnostics par mois<input id="c-missions" type="number" min="0" step="1" value="4"></label>
+            <label for="c-prix">Prix moyen d'un diagnostic (€ HT)<input id="c-prix" type="number" min="0" step="10" value="3340"></label>
+            <label for="c-rem">Remédiation et retests sur l'année (€ HT)<input id="c-rem" type="number" min="0" step="100" value="13540"></label>
+            <label for="c-mrr">Abonnements encaissés sur l'année (€ HT)<input id="c-mrr" type="number" min="0" step="100" value="22100"></label>
+            <label for="c-charges">Charges annuelles (€)<input id="c-charges" type="number" min="0" step="500" value="38000"></label>
+          </div>
+          <div class="tbl"><table class="num"><thead><tr><th>Flux</th><th>Contenu</th><th>An 1 (€ HT)</th></tr></thead><tbody>
+            <tr><td>Flux 1</td><td>Diagnostics ponctuels</td><td id="r-f1"></td></tr>
+            <tr><td>Flux 2</td><td>Remédiation accompagnée, retests, tour 360° apporteur (à partir du 5e mois)</td><td id="r-f2"></td></tr>
+            <tr><td>Flux 3</td><td>Abonnements de suivi</td><td id="r-f3"></td></tr>
+            <tr class="tot"><td colspan="2">Chiffre d'affaires</td><td id="r-ca"></td></tr>
+            <tr><td colspan="2">Charges</td><td id="r-ch"></td></tr>
+            <tr class="tot"><td colspan="2">Résultat avant impôts et rémunération</td><td id="r-res"></td></tr>
+          </tbody></table></div>
+        </article>
+        <article class="card wide"><h3>Les jalons</h3>
+          <ol class="steps"><li><strong>21/10</strong> · Vincent LAFAYE teste le mandat, puis les rapports</li><li><strong>28/10</strong> · Rendez-vous SARECO : facturation avant création, RC Pro</li><li>Test interne chez Hervé, mandat signé</li><li>Présentation à Kevin (ALSO), puis à SD CYBER</li><li>Tests grandeur nature : Olivier BRESSONNEAU (après validation juridique) et 2 clients HubSpot</li><li><strong>Janvier 2027</strong> · Immatriculation de PROUX AUDIT, premières factures</li></ol></article>
+      </div>
+    </div>
+
+    <!-- BUREAU -->
+    <div id="p-bureau" class="stack">
+      <section>
+        <div class="sec-head"><h2>L'organigramme</h2><p class="hint">Clique sur un agent pour ouvrir sa fiche de poste, ses tâches et lui parler.</p></div>
+        <div class="org" id="org"></div>
+      </section>
+
+
+      <section>
+        <div class="sec-head"><h2>Le circuit de décision</h2><p class="hint">Chaque initiative suit ce chemin avant d'engager PROUX AUDIT.</p></div>
+        <ol class="circuit" style="padding:0;margin:0">
+          <li class="you">Ton idée, ou un blocage remonté</li><li>Alexandre reformule et chiffre</li><li>Les agents concernés cherchent ce qui marche ailleurs</li><li>Nora vérifie la légalité</li><li>Recommandation avec options et risques</li><li class="you">Ton aval : oui, non, à revoir</li><li>Exécution par les agents</li><li>Marc contrôle avant envoi</li>
+        </ol>
+      </section>
+    </div>
+
+    <!-- PILOTAGE -->
+    <div id="p-pilotage" class="stack" hidden>
+      <section>
+        <div class="brief">
+          <div class="sec-head">
+            <div class="who"><div class="av c1">A</div><div><h3>Brief du jour</h3><div class="small" id="brief-meta">Par Alexandre, fondateur adjoint</div></div></div>
+            <button class="btn primary" id="btn-brief" type="button">Demander le brief</button>
+          </div>
+          <div class="md" id="brief">Le brief résume ce qui avance, ce qui bloque et ce qui attend ta décision. Demande-le à Alexandre.</div>
+        </div>
+      </section>
+      <div class="cards">
+        <article class="card"><h3>Chaque jour · 5 minutes</h3><p>Le brief du matin et la file d'avals : tu réponds oui, non ou à revoir.</p></article>
+        <article class="card"><h3>Lundi · comité de direction · 30 min</h3><p>Alexandre présente la synthèse de tous les services. Tu tranches, il répartit.</p></article>
+        <article class="card"><h3>1er lundi du mois · comité stratégique · 45 min</h3><p>Prix, nouveaux secteurs, partenaires, création de la SASU, nouveaux agents.</p></article>
+        <article class="card"><h3>Pas de réunion par service</h3><p>Les agents rendent compte à Alexandre. Tu n'ouvres un service que s'il est en rouge.</p></article>
+      </div>
+      <section>
+        <div class="sec-head"><h2>File d'avals</h2><p class="hint">Ce qui engage PROUX AUDIT attend ta réponse.</p></div>
+        <div class="list" id="avals"></div>
+      </section>
+      <section>
+        <div class="sec-head"><h2>Comité de direction</h2><button class="btn primary" id="btn-comite" type="button">Préparer l'ordre du jour</button></div>
+        <div class="brief"><div class="md" id="comite">Aucun ordre du jour préparé pour l'instant.</div></div>
+      </section>
+      <section>
+        <div class="sec-head"><h2>Journal des décisions</h2><p class="hint"><span id="n-decisions"></span> décisions récentes</p></div>
+        <div class="list" id="decisions"></div>
+      </section>
+    </div>
+
+    <!-- FICHES -->
+    <section id="p-fiches" hidden>
+      <div class="sec-head"><h2>Les fiches de poste</h2><p class="hint">Chaque agent a ses instructions écrites, son rythme et son indicateur.</p></div>
+      <div class="cards" id="fiches"></div>
+    </section>
+
+    <!-- CONFORMITE -->
+    <section id="p-conformite" hidden>
+      <div class="sec-head"><h2>Audit réglementaire</h2><p class="hint">Les points à tenir et leurs solutions. À valider avec l'avocat et l'expert-comptable.</p></div>
+      <div class="tbl"><table><thead><tr><th>Point</th><th>Solution réalisable</th><th>Quand</th><th>Coût</th></tr></thead><tbody>
+        <tr><td><strong>Autorisation des tests</strong> : un relevé sans accord écrit peut être un accès frauduleux à un système</td><td>Mandat d'autorisation signé par le dirigeant avant tout relevé ; avant mandat, uniquement des vérifications publiques (DNS, messagerie)</td><td>Toujours</td><td>0 €</td></tr>
+        <tr><td><strong>Facturation avant création</strong></td><td>Tout en pro forma jusqu'à l'immatriculation ; cadre à valider avec SARECO</td><td>28/10</td><td>0 €</td></tr>
+        <tr><td><strong>Assurance</strong> : les tests peuvent provoquer un incident chez le client</td><td>RC Pro couvrant explicitement les tests d'intrusion et diagnostics</td><td>Avant le 1er test client</td><td>À chiffrer</td></tr>
+        <tr><td><strong>Vocabulaire</strong> : laisser croire à une qualification officielle</td><td>« Diagnostic de sécurité avec validation manuelle » ; jamais « audit certifié »</td><td>Toujours</td><td>0 €</td></tr>
+        <tr><td><strong>Données des clients</strong> : résultats de diagnostic et données de santé</td><td>Convention de confidentialité, base hébergée en Europe (Paris), aucune donnée réelle à un tiers sans accord écrit</td><td>Toujours</td><td>0 €</td></tr>
+        <tr><td><strong>Facturation électronique</strong> : réception obligatoire depuis le 1er septembre 2026, émission à partir du 1er septembre 2027</td><td>Choisir une plateforme agréée au moment de l'immatriculation</td><td>Janvier 2027</td><td>Offre de base</td></tr>
+        <tr><td><strong>Mentions des factures</strong></td><td>SIRET, RCS, TVA, pénalités de retard et indemnité de 40 € : placeholders prêts dans les modèles</td><td>Janvier 2027</td><td>0 €</td></tr>
+        <tr><td><strong>Partenaires</strong></td><td>Contrats d'apporteur et de licence à 20 % signés</td><td>Avant la 1re affaire partenaire</td><td>0 €</td></tr>
+        <tr><td><strong>Marque</strong></td><td>Recherche d'antériorité INPI sur « Diagnostic Cyber PROUX », puis dépôt</td><td>Après immatriculation</td><td>Redevance INPI</td></tr>
+        <tr><td><strong>Prospection par mail</strong></td><td>Expéditeur identifié, lien de désinscription, sources publiques ; pas d'extraction automatique de LinkedIn</td><td>Dès le départ</td><td>0 €</td></tr>
+        <tr><td><strong>Indépendance</strong></td><td>Aucune infogérance dans PROUX AUDIT ; pas d'audit d'une entité qui fait aussi la maintenance</td><td>Toujours</td><td>0 €</td></tr>
+        <tr><td><strong>Agents IA</strong></td><td>À l'extérieur, on signe « PROUX AUDIT » ; un agent qui parle à un client se présente comme assistant IA</td><td>Dès le départ</td><td>0 €</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <!-- PLANNING -->
+    <section id="p-planning" hidden>
+      <div class="sec-head"><h2>Le planning</h2><p class="hint">Rythme cible. Pour tenir le budget, les agents travaillent à la demande tant que la machine n'est pas rodée.</p></div>
+      <div class="cards">
+        <article class="card"><h3>Une journée type</h3><ol class="steps"><li><strong>7h30</strong> · Brief du matin et file d'avals (Alexandre)</li><li><strong>Matin</strong> · Prospects détectés et qualifiés (Léa)</li><li><strong>12h</strong> · Ton créneau d'appels</li><li><strong>Après-midi</strong> · Relances et propositions (Thomas)</li><li><strong>18h</strong> · HubSpot à jour, ton 2e créneau d'appels</li><li><strong>Soir</strong> · Relecture de ce qui part (Marc), comptes rendus</li></ol></article>
+        <article class="card"><h3>La semaine et le mois</h3><ol class="steps"><li><strong>Lundi</strong> · Comité de direction ; point finances (Emma)</li><li><strong>Vendredi</strong> · Veille juridique (Nora), comptes rendus de la semaine</li><li><strong>1er lundi du mois</strong> · Comité stratégique</li><li><strong>1er du mois</strong> · Bilan chiffré, retests clients à planifier (Julien)</li><li><strong>Dernier vendredi</strong> · Revue des agents : ce qui marche, ce qui change</li></ol></article>
+      </div>
+    </section>
+
+    <!-- DOSSIERS -->
+    <section id="p-dossiers" hidden>
+      <div class="sec-head"><h2>Dossiers</h2>
+        <div class="filters" id="filters">
+          <button class="btn" data-f="ouverts" aria-pressed="true">Ouverts</button>
+          <button class="btn" data-f="actif" aria-pressed="false">Actifs</button>
+          <button class="btn" data-f="attente" aria-pressed="false">En attente</button>
+          <button class="btn" data-f="clos" aria-pressed="false">Clos</button>
+        </div>
+      </div>
+      <div class="list" id="dossiers"></div>
+    </section>
+
+    <!-- OUTILS -->
+    <section id="p-outils" hidden>
+      <div class="sec-head"><h2>Les outils</h2><p class="hint">Gratuits ou déjà payés en priorité.</p></div>
+      <div class="tbl"><table><thead><tr><th>Besoin</th><th>Outil</th><th>Coût</th></tr></thead><tbody>
+        <tr><td>Cerveau des agents</td><td>Claude (déjà payé)</td><td>Déjà payé</td></tr>
+        <tr><td>Base commune des agents</td><td>Supabase, projet hébergé à Paris</td><td>0 € (offre gratuite)</td></tr>
+        <tr><td>CRM, affaires, relances</td><td>HubSpot</td><td>Déjà en place</td></tr>
+        <tr><td>Messagerie</td><td>Outlook · audit.proux@outlook.com</td><td>Déjà en place</td></tr>
+        <tr><td>Domaine et site</td><td>prouxaudit.fr chez OVH</td><td>Payé jusqu'en 2029</td></tr>
+        <tr><td>Relevés techniques</td><td>Machine Kali : Nmap, ZAP, Nuclei, puis qualification manuelle</td><td>0 €</td></tr>
+        <tr><td>Restitution</td><td>Outil Diagnostic Cyber PROUX (rapport dirigeant et rapport technique)</td><td>0 €</td></tr>
+        <tr><td>Comptes rendus de réunion</td><td>Plaud</td><td>Déjà en place</td></tr>
+        <tr><td>Documents clients</td><td>Word et PDF aux couleurs PROUX AUDIT</td><td>Déjà en place</td></tr>
+        <tr><td>Données prospects</td><td>Annuaire des entreprises (État), BODACC, BOAMP</td><td>0 €</td></tr>
+        <tr><td>Juridique</td><td>Légifrance, CNIL, Cybermalveillance.gouv.fr, INPI</td><td>0 €</td></tr>
+      </tbody></table></div>
+    </section>
+
+  </div>
+</main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const SERVER="Supabase", TOOL="execute_sql", PROJECT="fcesspfwfpfxadeodbrj";
+const ST_T={a_faire:"À faire",en_cours:"En cours",fait:"Fait",bloque:"Bloqué"};
+const ST_D={actif:"Actif",attente:"En attente",bloque:"Bloqué",clos:"Clos"};
+const REP={oui:"Oui",non:"Non",a_revoir:"À revoir"};
+const REGLES=`Règles communes de PROUX AUDIT (conseil IT et Diagnostic Cyber pour TPE/PME, Pays de la Loire ; dirigeant : Frédéric PROUX ; immatriculation de la SASU prévue en janvier 2027, tout est en pro forma d'ici là).
+- Tu t'adresses à Frédéric en le tutoyant, en français simple, phrases courtes, sans anglicismes ni sigles non expliqués.
+- Tu ne prétends jamais avoir envoyé un mail, appelé quelqu'un ou modifié HubSpot : tu prépares, Frédéric envoie depuis Outlook (audit.proux@outlook.com).
+- Tout ce qui engage PROUX AUDIT (envoi, prix, devis, engagement) devient un aval que Frédéric valide.
+- Jamais « audit certifié », jamais « PASSI », pas de formules négatives dans les documents clients. Diagnostic de sécurité avec validation manuelle ; mandat signé avant tout relevé actif.
+- i3konnect n'est jamais présenté comme partenaire. PROUX AUDIT est indépendant : ni juge ni partie.
+- Si une information te manque, dis-le simplement au lieu de l'inventer.
+- Objectif an 1 (scénario réaliste fixé en mars 2026, à recaler avec la nouvelle grille) : 195 960 € HT jusqu'au 31/03/2027 = diagnostics ponctuels 160 320 € (4 par mois à 3 340 € en moyenne) + remédiation et retests 13 540 € + abonnements 22 100 € (3 900 € par mois visés au 12e mois) ; charges environ 38 000 €.`;
+let dossierChoisi="";
+let data=null, filtre="ouverts", busy=false, agentOuvert=null, chatBusy=false;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const q=s=>"'"+String(s).replace(/'/g,"''")+"'";
+const fdate=d=>{if(!d)return"";const x=new Date(String(d).length===10?d+"T12:00:00":d);return x.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"})};
+const fdt=d=>new Date(d).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+const daysTo=d=>{if(!d)return null;const t=new Date(d+"T12:00:00"),n=new Date();n.setHours(12,0,0,0);return Math.round((t-n)/864e5)};
+const today=()=>new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const iso=()=>new Date().toISOString().slice(0,10);
+function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600)}
+function notice(html,crit){const n=$("notice");if(!html){n.hidden=true;n.innerHTML="";return}n.className="notice"+(crit?" crit":"");n.innerHTML=html;n.hidden=false}
+function md(t){
+  const lines=esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").split(/\n/);
+  let out="",inList=false;
+  for(const l of lines){const s=l.trim();
+    if(/^[-•*]\s+/.test(s)){if(!inList){out+="<ul>";inList=true}out+="<li>"+s.replace(/^[-•*]\s+/,"")+"</li>";continue}
+    if(inList){out+="</ul>";inList=false}
+    if(!s)continue;
+    if(/^#{1,4}\s+/.test(s))out+="<h4>"+s.replace(/^#{1,4}\s+/,"")+"</h4>"; else out+="<p>"+s+"</p>";
+  }
+  if(inList)out+="</ul>";return out;
+}
+
+const SB_URL="https://fcesspfwfpfxadeodbrj.supabase.co", SB_KEY="sb_publishable_eUlrRV1E41BE1PgX3MnwtQ_UsiP-83a";
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+function permButtons(){return `<button class="btn primary" type="button" id="btn-retry">Actualiser</button>`}
+async function load(){
+  if(busy)return; busy=true; $("btn-refresh").disabled=true; $("maj").textContent="Lecture de la base…";
+  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; notice(null); render(); $("maj").textContent="Base lue le "+fdt(data.maj) }
+  catch(e){ notice("<p>Lecture impossible : "+esc(e.message||"erreur")+"</p>"+permButtons(),true); $("maj").textContent="Base non lue" }
+  finally{busy=false;$("btn-refresh").disabled=false}
+}
+async function run(p,ok){
+  if(busy)return false; busy=true;
+  try{ const {error}=await p; if(error)throw error; if(ok)toast(ok); busy=false; await load(); return true }
+  catch(e){ busy=false; notice("<p>L'opération n'a pas abouti : "+esc(e.message||"erreur")+"</p>",true); return false }
+}
+const nowIso=()=>new Date().toISOString();
+
+const ag=id=>(data?.agents||[]).find(x=>x.id===id);
+const agentName=id=>ag(id)?.prenom||id||"—";
+const dTitre=id=>(data?.dossiers||[]).find(x=>x.id===id)?.titre||"";
+const initiale=p=>(p||"?").normalize("NFD").replace(/[\u0300-\u036f]/g,"").charAt(0).toUpperCase();
+const avClass=i=>["","c1","c2"][i%3];
+
+function render(){
+  if(!data)return;
+  const ouvertes=data.taches.filter(t=>t.statut!=="fait"), enAtt=data.avals.filter(a=>!a.reponse);
+  const proches=ouvertes.filter(t=>{const d=daysTo(t.pour_quand);return d!==null&&d<=7});
+  $("k-avals").textContent=enAtt.length;$("k-taches").textContent=ouvertes.length;$("k-retard").textContent=proches.length;$("k-dossiers").textContent=data.dossiers.filter(d=>d.statut==="actif").length;
+  $("n-avals").textContent=enAtt.length||"";$("n-dossiers").textContent=data.dossiers.filter(d=>d.statut!=="clos").length;$("n-decisions").textContent=data.decisions.length;
+
+  // Brief et comité enregistrés
+  const brief=data.notes.find(n=>n.type==="brief"), comite=data.notes.find(n=>n.type==="comite");
+  if(brief){$("brief").innerHTML=md(brief.fait);$("brief-meta").textContent="Par Alexandre · "+fdt(brief.cree_le)}
+  if(comite){$("comite").innerHTML=md(comite.fait)}
+
+  // Organigramme
+  const dir=data.agents.find(a=>!a.rattache_a), equipe=data.agents.filter(a=>a.rattache_a);
+  const card=(a,i)=>{const ts=ouvertes.filter(t=>t.agent_id===a.id);const nx=ts.filter(t=>t.pour_quand).sort((x,y)=>x.pour_quand.localeCompare(y.pour_quand))[0];
+    return `<button class="ag ${a.rattache_a?"":"adj"}" data-agent="${esc(a.id)}" aria-pressed="${agentOuvert===a.id}">
+      <div class="top"><div class="av ${avClass(i)}">${esc(initiale(a.prenom))}</div><div><div class="name">${esc(a.prenom)}</div><div class="role">${esc(a.role||a.service)}</div></div></div>
+      <div class="stats"><span><b>${ts.length}</b> tâche(s)</span>${nx?`<span>prochaine : <b>${fdate(nx.pour_quand)}</b></span>`:""}${data.echanges.some(e=>e.agent_id===a.id)?`<span>· échanges</span>`:""}</div></button>`};
+  $("org").innerHTML=`<div class="lvl"><div class="ag ceo adj"><div class="top"><div class="av">F</div><div><div class="name">Frédéric PROUX</div><div class="role">Directeur général · donne l'aval</div></div></div></div></div>
+    <div class="stem"></div>${dir?`<div class="lvl">${card(dir,1)}</div><div class="stem"></div>`:""}
+    <div class="team">${equipe.map((a,i)=>card(a,i+2)).join("")}</div>`;
+
+  if(brief){$("brief2").innerHTML=md(brief.fait);$("brief-meta2").textContent="Par Alexandre · "+fdt(brief.cree_le)}
+  renderAgent(); renderSalle(); renderBureau();
+  renderAvals(); renderDossiers();
+  $("fiches").innerHTML=data.agents.map((a,i)=>`<button class="card agentcard" data-agent="${esc(a.id)}" data-goto="1">
+    <div class="row"><div class="av ${avClass(i+1)}">${esc(initiale(a.prenom))}</div><div><h3>${esc(a.prenom)}</h3><div class="small">${esc(a.role||a.service)}</div></div></div>
+    <p>${esc(a.fiche_de_poste||"")}</p>${a.missions?.length?`<ul>${a.missions.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:""}
+    <dl class="kv"><dt>Rythme</dt><dd>${esc(a.horaires||"—")}</dd><dt>Indicateur</dt><dd>${esc(a.indicateur||"—")}</dd></dl></button>`).join("");
+  $("decisions").innerHTML=data.decisions.length?data.decisions.map(x=>`<article class="item"><div class="row"><span class="mono">${fdate(x.decide_le)}</span>${x.dossier_id?`<span class="small">${esc(dTitre(x.dossier_id))}</span>`:""}</div><div>${esc(x.decision)}</div></article>`).join(""):`<div class="empty">Aucune décision enregistrée.</div>`;
+}
+
+const GRAD=n=>"g"+(n%8);
+function portrait(a,i){return a.photo&&/^(data:image\/|https:\/\/)/.test(a.photo)?`<img src="${esc(a.photo)}" alt="">`:esc(initiale(a.prenom))}
+function prochainLundi(){const d=new Date();const k=(8-d.getDay())%7||7;d.setDate(d.getDate()+k);return d}
+function premierLundiMois(){const n=new Date();let d=new Date(n.getFullYear(),n.getMonth(),1);while(d.getDay()!==1)d.setDate(d.getDate()+1);if(d<=n){d=new Date(n.getFullYear(),n.getMonth()+1,1);while(d.getDay()!==1)d.setDate(d.getDate()+1)}return d}
+const fjour=d=>d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+function renderSalle(){
+  const actifs=new Set(data.actifs||[]);
+  const ouvertes=data.taches.filter(t=>t.statut!=="fait");
+  // Services
+  $("services").innerHTML=data.agents.map(a=>{const ts=data.taches.filter(t=>t.agent_id===a.id);return `<li><button type="button" data-agent="${esc(a.id)}"><span>${esc(a.service)}</span><span class="cnt">${ts.filter(t=>t.statut==="fait").length}/${ts.length}</span></button></li>`}).join("");
+  // Places autour de la table : Alexandre au centre
+  const dir=data.agents.find(x=>!x.rattache_a), eq=data.agents.filter(x=>x.rattache_a);
+  const half=Math.ceil(eq.length/2), ordre=[...eq.slice(0,half),dir,...eq.slice(half)].filter(Boolean);
+  $("seats").innerHTML=ordre.map(a=>{const i=data.agents.indexOf(a),on=actifs.has(a.id);return `
+    <button class="seat ${a===dir?"lead2":""}" data-agent="${esc(a.id)}" aria-pressed="${agentOuvert===a.id}" title="${esc(a.prenom)} · ${esc(a.role||a.service)}">
+      <span class="card2"><span class="nm">${esc(a.prenom)}</span><span class="rl">${esc(a.role||a.service)}</span><span class="stt"><span class="dot2 ${on?"on":""}"></span>${on?"A travaillé aujourd'hui":"En pause"}</span></span>
+      <span class="pic ${GRAD(i)}">${portrait(a,i)}<span class="st ${on?"on":""}"></span></span>
+    </button>`}).join("");
+  // Prochaine réunion
+  const sujets=data.avals.filter(v=>!v.reponse).length+ouvertes.filter(t=>t.statut==="bloque").length+ouvertes.filter(t=>{const d=daysTo(t.pour_quand);return d!==null&&d<=7}).length;
+  $("meeting").innerHTML=`<span class="tag">Pas en cours</span><h3>Prochaine réunion</h3><div class="big2">Comité de direction</div><p>${fjour(prochainLundi())} · 30 minutes</p><p>${sujets} sujet(s) à l'ordre du jour</p><p>Comité stratégique : ${fjour(premierLundiMois())}</p><small>L'ordre du jour se prépare dans Plans, dossiers et consignes → Pilotage.</small>`;
+  // Objectif
+  const L=data.nleads||0, Q=data.nleads_q||0, C=data.nclients||0, T=data.dossiers.filter(d=>d.agent_id==="diagnostic"&&d.statut!=="clos").length;
+  const st=(lab,v,obj)=>`<div class="fstep"><div class="lab"><span>${lab}</span><b>${v}</b></div><div class="bar"><i style="width:${Math.min(100,obj?v/obj*100:0)}%"></i></div><span class="small">objectif ${obj}</span></div>`;
+  $("objectif").innerHTML=`<div class="objrow"><div><h3>Objectif : 4 diagnostics par mois</h3><div class="small">Scénario réaliste an 1 : 195 960 € HT au 31/03/2027, 3 900 € d'abonnements par mois au 12e mois.</div></div>
+    <div class="funnel">${st("Prospects détectés",L,100)}${st("Prospects qualifiés",Q,30)}${st("Diagnostics en cours",T,4)}${st("Clients en abonnement",C,12)}</div></div>
+    ${L===0?`<div class="alert">Aucun prospect dans la base pour l'instant : Léa n'a pas encore été lancée. Demande-lui de qualifier les leads cyber en attente.</div>`:""}`;
+  // Fil de l'équipe
+  const fil=data.echanges.slice(-12).reverse();
+  $("fil").innerHTML=fil.length?fil.map(e=>{const a=ag(e.agent_id);return `<article class="item"><div class="who2"><div class="av ${GRAD(data.agents.indexOf(a))}" style="color:#fff">${esc(initiale(e.auteur==="frederic"?"F":a?.prenom))}</div><div style="min-width:0"><strong>${e.auteur==="frederic"?"Toi → "+esc(a?.prenom||""):e.auteur==="discussion"?"Discussion Claude → "+esc(a?.prenom||""):esc(a?.prenom||"")}</strong> <span class="small">· ${fdt(e.cree_le)}${e.dossier_id?" · "+esc(dTitre(e.dossier_id)):""}</span><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(e.texte.length>400?e.texte.slice(0,400)+"…":e.texte)}</div></div></div></article>`}).join(""):`<div class="empty">Aucun échange pour l'instant. Choisis un agent dans la barre du bas et pose ta première question.</div>`;
+  // Barre de commande
+  const sel=$("cmd-agent"), v=sel.value;
+  sel.innerHTML=data.agents.map(a=>`<option value="${esc(a.id)}">À ${esc(a.prenom)}${a===dir?" (il répartit)":" · "+esc(a.service)}</option>`).join("");
+  sel.value=v&&ag(v)?v:(dir?.id||"");
+}
+function renderBureau(){
+  const auj=new Date(); auj.setHours(23,59,0,0);
+  const avs=data.avals.filter(v=>!v.reponse).map(v=>({k:"aval",v,urg:daysTo(v.date_limite)??99}));
+  const ts=data.taches.filter(t=>t.statut==="bloque"||(t.statut!=="fait"&&daysTo(t.pour_quand)!==null&&daysTo(t.pour_quand)<=2)).map(t=>({k:"tache",t,urg:daysTo(t.pour_quand)??50}));
+  const items=[...avs,...ts].sort((x,y)=>x.urg-y.urg);
+  $("b-bureau").textContent=items.length; $("b-bureau").hidden=!items.length;
+  $("atoi-n").textContent=items.length?items.length+" à traiter":"";
+  $("atoi-list").innerHTML=items.length?items.map((it,n)=>{
+    if(it.k==="aval"){const a=it.v;return `<article class="item urgent"><div class="row"><span class="num1">${n+1}</span><span class="title" style="flex:1;min-width:0">${esc(a.demande)}</span></div>
+      <div class="chips"><span class="chip dec">Décision</span>${a.date_limite?`<span class="chip ${daysTo(a.date_limite)<0?"late":""}">avant le ${fdate(a.date_limite)}</span>`:""}${a.propose_par?`<span class="chip">${esc(a.propose_par)}</span>`:""}</div>
+      ${a.commentaire?`<details><summary>Lire tout</summary><p>${esc(a.commentaire).replace(/\n/g,"<br>")}</p></details>`:""}
+      <label class="sr" for="bur-a-${a.id}">Ton explication</label><textarea id="bur-a-${a.id}" maxlength="1500" placeholder="Ton explication ou ta correction (facultatif)"></textarea>
+      <div class="acts"><button class="btn go" data-act="aval" data-id="${a.id}" data-r="oui">Oui</button><button class="btn" data-act="aval" data-id="${a.id}" data-r="non">Non</button><button class="btn" data-act="aval" data-id="${a.id}" data-r="a_revoir">Corriger</button></div></article>`}
+    const t=it.t,d=daysTo(t.pour_quand);return `<article class="item ${t.statut==="bloque"||d<0?"urgent":""}"><div class="row"><span class="num1">${n+1}</span><span class="title" style="flex:1;min-width:0">${esc(t.quoi)}</span></div>
+      <div class="chips"><span class="chip">${ST_T[t.statut]}</span>${t.pour_quand?`<span class="chip ${d<0?"late":""}">${d<0?"en retard · ":""}${fdate(t.pour_quand)}</span>`:""}<span class="chip">${esc(agentName(t.agent_id))}</span>${t.dossier_id?`<span class="chip">${esc(dTitre(t.dossier_id))}</span>`:""}</div>
+      ${t.note?`<details><summary>Lire tout</summary><p>${esc(t.note).replace(/\n/g,"<br>")}</p></details>`:""}
+      <div class="acts"><button class="btn go" data-act="tache" data-id="${t.id}" data-s="fait">C'est fait</button><button class="btn" data-act="demain" data-id="${t.id}">Demain</button><button class="btn" data-act="incompris" data-id="${t.id}">Je ne comprends pas</button></div>
+      <details class="reply"><summary>Corriger ou répondre</summary><div class="list" style="margin-top:6px"><textarea id="bur-t-${t.id}" maxlength="1500" placeholder="Ta réponse à ${esc(agentName(t.agent_id))}"></textarea><button class="btn primary" data-act="noter" data-id="${t.id}">Envoyer à ${esc(agentName(t.agent_id))}</button></div></details></article>`}).join("")
+    :`<div class="empty">Rien d'urgent. Les avals à trancher et les tâches bloquées ou dues sous 2 jours apparaissent ici, dans l'ordre.</div>`;
+  // Réponses des agents
+  const reps=data.echanges.filter(e=>e.auteur==="agent").slice(-8).reverse();
+  $("reponses").innerHTML=reps.length?reps.map(e=>{const a=ag(e.agent_id);return `<article class="item"><div class="row"><strong>${esc(a?.prenom||"")}</strong><span class="small">${fdt(e.cree_le)}</span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px">${esc(e.texte.length>320?e.texte.slice(0,320)+"…":e.texte)}</div><div class="row"><button class="btn" data-agent="${esc(e.agent_id)}">Répondre à ${esc(a?.prenom||"")}</button></div></article>`}).join(""):`<div class="empty">Les réponses des agents apparaîtront ici.</div>`;
+  // Le bureau aujourd'hui, par service
+  const ouvertes=data.taches.filter(t=>t.statut!=="fait");
+  $("jour-list").innerHTML=data.agents.filter(a=>ouvertes.some(t=>t.agent_id===a.id)).map(a=>{const i=data.agents.indexOf(a);const tt=ouvertes.filter(t=>t.agent_id===a.id).sort((x,y)=>(x.pour_quand||"9").localeCompare(y.pour_quand||"9"));return `<article class="item"><div class="svc">${esc(a.service)}</div>${tt.slice(0,4).map(t=>`<div class="who2"><div class="av ${GRAD(i)}" style="color:#fff">${esc(initiale(a.prenom))}</div><div style="min-width:0"><strong>${esc(a.prenom)}</strong> · ${esc(t.quoi)}<div class="small">${t.pour_quand?fdate(t.pour_quand):"sans date"} · ${ST_T[t.statut]}</div></div></div>`).join("")}${tt.length>4?`<button class="btn" data-agent="${esc(a.id)}">+ ${tt.length-4} autre(s)</button>`:""}</article>`}).join("")||`<div class="empty">Aucune tâche ouverte.</div>`;
+  $("k-leads").textContent=data.nleads||0; $("k-clients").textContent=data.nclients||0;
+}
+function showView(v){
+  document.querySelectorAll(".vbtn").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
+  ["salle","bureau","fond"].forEach(x=>$("v-"+x).hidden=x!==v);
+  try{localStorage.setItem("salle-view",v)}catch(e){}
+}
+function tick(){const n=new Date();$("today").textContent=n.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("time").textContent=n.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+tick();setInterval(tick,30000);
+
+function renderAvals(){
+  $("avals").innerHTML=data.avals.length?data.avals.map(a=>`
+    <article class="item ${!a.reponse?"urgent":""}">
+      <div class="row"><span class="title">${esc(a.demande)}</span>${a.reponse?`<span class="pill ${a.reponse}">${REP[a.reponse]}</span>`:""}</div>
+      <div class="small">${a.propose_par?"Proposé par "+esc(a.propose_par)+" · ":""}${a.dossier_id?esc(dTitre(a.dossier_id))+" · ":""}${a.date_limite?"avant le "+fdate(a.date_limite):"sans date limite"}</div>
+      ${a.commentaire?`<details><summary>Voir le détail</summary><p>${esc(a.commentaire).replace(/\n/g,"<br>")}</p></details>`:""}
+      ${a.reponse_texte?`<div class="next small">${esc(a.reponse_texte).replace(/\n/g,"<br>")}</div>`:""}
+      ${!a.reponse?`<label class="small" for="rep-a-${a.id}">Ton explication (facultatif)</label><textarea id="rep-a-${a.id}" maxlength="1500" placeholder="Ex. : oui, mais attendre le retour de Mickaël avant d'envoyer"></textarea>`:""}
+      ${!a.reponse?`<div class="row"><button class="btn ok" data-act="aval" data-id="${a.id}" data-r="oui">Oui</button><button class="btn re" data-act="aval" data-id="${a.id}" data-r="a_revoir">À revoir</button><button class="btn no" data-act="aval" data-id="${a.id}" data-r="non">Non</button></div>`:""}
+    </article>`).join(""):`<div class="empty">Aucun aval en attente. Quand un agent prépare un envoi, un prix ou un devis, il apparaît ici pour ta décision.</div>`;
+}
+function renderDossiers(){
+  const ds=data.dossiers.filter(d=>filtre==="ouverts"?d.statut!=="clos":d.statut===filtre);
+  $("dossiers").innerHTML=ds.length?ds.map(d=>`
+    <article class="item ${d.priorite===1&&d.statut!=="clos"?"urgent":""}">
+      <div class="row">${d.priorite?`<span class="prio p${d.priorite}">P${d.priorite}</span>`:""}<span class="title">${esc(d.titre)}</span><span class="pill ${d.statut}">${ST_D[d.statut]||d.statut}</span>${d.verrouille?`<span class="lock">Verrouillé</span>`:""}</div>
+      <div class="small">${esc(d.client||"")} · suivi par ${esc(agentName(d.agent_id))} · <span class="mono">${esc(d.id)}</span></div>
+      ${d.prochaine_action?`<div class="next">${esc(d.prochaine_action)}</div>`:""}
+      <details><summary>État et vigilance</summary>${d.etat?`<p>${esc(d.etat)}</p>`:""}${d.vigilance?`<p><strong>Vigilance :</strong> ${esc(d.vigilance)}</p>`:""}</details>
+      ${(d.discussions||[]).length?`<details><summary>Discussions Claude liées (${d.discussions.length})</summary><ul class="links">${d.discussions.map(x=>/^https:\/\/claude\.ai\//.test(x.url||"")?`<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.titre)}</a> <span class="mono">${fdate(x.date)}</span></li>`:"").join("")}</ul></details>`:""}
+      <div class="row"><button class="btn" data-act="lock" data-id="${esc(d.id)}">${d.verrouille?"Déverrouiller":"Verrouiller"}</button></div>
+    </article>`).join(""):`<div class="empty">Aucun dossier dans ce filtre.</div>`;
+}
+
+function renderAgent(){
+  const p=$("agent-panel"); const a=ag(agentOuvert);
+  if(!a){p.hidden=true;p.innerHTML="";return}
+  const i=data.agents.indexOf(a);
+  const ts=data.taches.filter(t=>t.agent_id===a.id).sort((x,y)=>(x.statut==="fait")-(y.statut==="fait"));
+  const ech=data.echanges.filter(e=>e.agent_id===a.id).slice(-30);
+  const draft=$("chat-in")?.value||""; if($("chat-dossier"))dossierChoisi=$("chat-dossier").value;
+  p.hidden=false;
+  p.innerHTML=`<div class="panel">
+    <div class="head"><div class="av ${avClass(i+1)}">${esc(initiale(a.prenom))}</div><div style="flex:1;min-width:0"><h2>${esc(a.prenom)}</h2><div class="small">${esc(a.role||a.service)}</div></div><button class="btn" data-close>Fermer</button></div>
+    <div class="cols">
+      <div class="fiche">
+        <div class="eyebrow">Fiche de poste</div>
+        <p style="margin:0">${esc(a.fiche_de_poste||"")}</p>
+        ${a.missions?.length?`<ul>${a.missions.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:""}
+        <dl class="kv"><dt>Rythme</dt><dd>${esc(a.horaires||"—")}</dd><dt>Indicateur</dt><dd>${esc(a.indicateur||"—")}</dd><dt>Rend compte à</dt><dd>${a.rattache_a?esc(agentName(a.rattache_a)):"Frédéric"}</dd></dl>
+        <div class="eyebrow" style="margin-top:6px">Tâches (${ts.filter(t=>t.statut!=="fait").length} ouvertes)</div>
+        <div class="list">${ts.length?ts.map(t=>{const d=daysTo(t.pour_quand);const urg=t.statut!=="fait"&&d!==null&&d<=2;return `
+          <article class="item ${urg?"urgent":""}">
+            <div class="row"><span class="pill ${t.statut}">${ST_T[t.statut]}</span>${t.pour_quand?`<span class="mono">${d<0&&t.statut!=="fait"?"en retard · ":""}${fdate(t.pour_quand)}</span>`:""}</div>
+            <div>${esc(t.quoi)}</div>${t.dossier_id?`<div class="small">${esc(dTitre(t.dossier_id))}</div>`:""}
+            ${t.note?`<div class="next small">${esc(t.note).replace(/\n/g,"<br>")}</div>`:""}
+            <details class="reply"><summary>Répondre ou expliquer</summary><div class="list" style="margin-top:6px"><label class="small" for="rep-t-${t.id}">Ta réponse, ${esc(a.prenom)} la lira à son prochain passage</label><textarea id="rep-t-${t.id}" maxlength="1500"></textarea><div class="row"><button class="btn primary" data-act="noter" data-id="${t.id}">Envoyer à ${esc(a.prenom)}</button></div></div></details>
+            ${t.statut!=="fait"?`<div class="row">${t.statut!=="en_cours"?`<button class="btn" data-act="tache" data-id="${t.id}" data-s="en_cours">En cours</button>`:""}<button class="btn ok" data-act="tache" data-id="${t.id}" data-s="fait">Fait</button>${t.statut!=="bloque"?`<button class="btn no" data-act="tache" data-id="${t.id}" data-s="bloque">Bloqué</button>`:`<button class="btn" data-act="tache" data-id="${t.id}" data-s="a_faire">Débloquer</button>`}</div>`:""}
+          </article>`}).join(""):`<div class="empty">Aucune tâche pour ${esc(a.prenom)}.</div>`}</div>
+      </div>
+      <div class="chat">
+        <div class="eyebrow">Parler à ${esc(a.prenom)}</div>
+        <div class="msgs" id="msgs">${ech.length?ech.map(e=>`<div class="msg ${e.auteur==="frederic"?"me":e.auteur==="discussion"?"disc":"ag2"}">${esc(e.texte)}<span class="when">${e.en_attente?"En attente de réponse · ":""}${e.auteur==="frederic"?"Toi":e.auteur==="discussion"?"Depuis ta discussion Claude":esc(a.prenom)} · ${fdt(e.cree_le)}${e.dossier_id?" · "+esc(dTitre(e.dossier_id)):""}</span></div>`).join(""):`<div class="small">Pose une question ou donne une instruction. ${esc(a.prenom)} répond à partir de sa fiche, de ses tâches et de ses dossiers, et peut te proposer des tâches ou des avals à valider.</div>`}</div>
+        <div class="props" id="props"></div>
+        <form id="chat-form" class="list">
+          <label for="chat-dossier" class="small">Dossier concerné (pour retrouver l'échange dans ta discussion)</label>
+          <select id="chat-dossier"><option value="">Aucun en particulier</option>${data.dossiers.filter(d=>d.statut!=="clos").map(d=>`<option value="${esc(d.id)}" ${d.id===dossierChoisi?"selected":""}>${esc(d.titre)}</option>`).join("")}</select>
+          <label for="chat-in" class="small">Ton message</label>
+          <textarea id="chat-in" maxlength="1500" placeholder="Ex. : où en est-on avec les testeurs du Diagnostic Cyber ?">${esc(draft)}</textarea>
+          <div class="row"><button class="btn primary" type="submit" id="chat-send">Envoyer</button><button class="btn gpt" type="button" data-act="gpt">Avis ChatGPT</button><span class="think" id="chat-state"></span></div>
+        </form>
+      </div>
+    </div></div>`;
+  const m=$("msgs"); if(m)m.scrollTop=m.scrollHeight;
+  renderProps();
+}
+let propositions=[];
+function renderProps(){
+  const el=$("props"); if(!el)return;
+  el.innerHTML=propositions.map((p,k)=>`<div class="prop"><span><strong>${p.type==="aval"?"Aval proposé":"Tâche proposée"}${p.type==="tache"&&p.agent_id?" pour "+esc(agentName(p.agent_id)):""} :</strong> ${esc(p.quoi)}${p.pour_quand?" · "+fdate(p.pour_quand):""}</span><button class="btn ok" data-prop="${k}" data-ok="1">Créer</button><button class="btn" data-prop="${k}">Ignorer</button></div>`).join("");
+}
+
+function dossiersDe(a){
+  const ids=new Set(data.taches.filter(t=>t.agent_id===a.id&&t.dossier_id).map(t=>t.dossier_id));
+  return data.dossiers.filter(d=>d.agent_id===a.id||ids.has(d.id)).map(d=>`- ${d.id} · ${d.titre} (${ST_D[d.statut]}${d.verrouille?", verrouillé":""}) : ${String(d.etat||"").slice(0,500)} | Prochaine action : ${d.prochaine_action||"—"} | Vigilance : ${d.vigilance||"—"}`).join("\n");
+}
+function tachesTxt(f){return data.taches.filter(f).map(t=>`- [${ST_T[t.statut]}] ${agentName(t.agent_id)} : ${t.quoi}${t.pour_quand?" (pour le "+fdate(t.pour_quand)+")":""}${t.dossier_id?" · dossier "+t.dossier_id:""}${t.note?" · réponses de Frédéric : "+t.note.replace(/\n/g," / "):""}`).join("\n")||"(aucune)"}
+
+async function envoyer(agentId,texte){
+  const a=ag(agentId||agentOuvert), txt=(texte??$("chat-in")?.value??"").trim(); if(!a||!txt)return;
+  if(agentOuvert!==a.id){agentOuvert=a.id;renderAgent();renderSalle()}
+  const dsel=/^d\d+$/.test(dossierChoisi)?dossierChoisi:null;
+  const ok=await run(sb.from("echanges").insert({agent_id:a.id,dossier_id:dsel,auteur:"frederic",texte:txt,en_attente:true}),"Message transmis à "+a.prenom+" : réponse à son prochain passage");
+  if(ok){ if($("chat-in"))$("chat-in").value=""; if(texte!==undefined)$("cmd-text").value="" }
+}
+async function genererNote(type){
+  const dir=data.agents.find(x=>!x.rattache_a)||ag("direction");
+  const txt=type==="brief"?"Demande : prépare le point du jour (ce qui presse, ce qui avance ou bloque, ce qui attend ma décision) et enregistre-le en compte rendu de type brief.":"Demande : prépare l'ordre du jour du comité de direction de lundi et enregistre-le en compte rendu de type comite.";
+  await run(sb.from("echanges").insert({agent_id:dir.id,auteur:"frederic",texte:txt,en_attente:true}),"Demande transmise à Alexandre : réponse à son prochain passage");
+}
+function ouvrirChatGPT(agentId,texte){
+  const a=ag(agentId)||ag("direction");
+  const ctx=`Tu es le contradicteur de la salle de conseil de PROUX AUDIT (conseil IT et Diagnostic Cyber pour TPE/PME, Pays de la Loire). Donne un second avis franc et concret, en français simple.\n\nQuestion posée à ${a?.prenom||"l'équipe"} (${a?.role||""}) : ${texte||"(aucune)"}\n\nSes tâches ouvertes :\n${tachesTxt(t=>t.agent_id===a?.id&&t.statut!=="fait")}`;
+  window.open("https://chatgpt.com/?q="+encodeURIComponent(ctx.slice(0,6000)),"_blank","noopener");
+}
+
+function showTab(name){
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.tab===name)));
+  ["plan","bureau","pilotage","fiches","conformite","planning","dossiers","outils"].forEach(p=>$("p-"+p).hidden=p!==name);
+  try{localStorage.setItem("salle-tab",name)}catch(e){}
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>showTab(t.dataset.tab)));
+document.querySelectorAll("[data-go]").forEach(k=>k.addEventListener("click",()=>showTab(k.dataset.go)));
+$("filters").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;filtre=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderDossiers()});
+$("btn-refresh").addEventListener("click",load);
+$("btn-brief").addEventListener("click",()=>genererNote("brief"));
+$("btn-comite").addEventListener("click",()=>genererNote("comite"));
+document.addEventListener("submit",e=>{if(e.target.id==="chat-form"){e.preventDefault();envoyer()}});
+document.addEventListener("keydown",e=>{if(e.target.id==="chat-in"&&e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();envoyer()}});
+document.addEventListener("click",async e=>{
+  const t=e.target;
+  if(t.id==="btn-retry")return load();
+  const card=t.closest("[data-agent]"); if(card){const id2=card.dataset.agent;const was=$("v-salle").hidden;showView("salle");agentOuvert=(agentOuvert===id2&&!was&&card.classList.contains("seat"))?null:id2;$("cmd-agent").value=agentOuvert||$("cmd-agent").value;propositions=[];render();if(agentOuvert)$("agent-panel").scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(t.closest("[data-close]")){agentOuvert=null;propositions=[];render();return}
+  const pr=t.closest("[data-prop]"); if(pr){const k=+pr.dataset.prop,p=propositions[k];if(!p)return;
+    if(pr.dataset.ok){const ok=p.type==="aval"
+      ?await run(sb.from("avals").insert({entite:"proux_audit",dossier_id:p.dossier_id,demande:p.quoi,propose_par:agentName(agentOuvert)}),"Aval ajouté à la file")
+      :await run(sb.from("taches").insert({entite:"proux_audit",dossier_id:p.dossier_id,agent_id:p.agent_id,quoi:p.quoi,pour_quand:p.pour_quand,statut:"a_faire",cree_par:agentName(agentOuvert)}),"Tâche créée");
+      if(!ok)return}
+    propositions.splice(k,1);renderProps();return}
+  const b=t.closest("[data-act]"); if(!b)return; const id=b.dataset.id;
+  const txa=(b.closest("article")?.querySelector("textarea")?.value||"").trim();
+  if(b.dataset.act==="tache"&&/^\d+$/.test(id)&&ST_T[b.dataset.s])run(sb.from("taches").update({statut:b.dataset.s,maj_le:nowIso()}).eq("id",+id),"Tâche : "+ST_T[b.dataset.s]);
+  if(b.dataset.act==="aval"&&/^\d+$/.test(id)&&REP[b.dataset.r])run(sb.rpc("repondre_aval",{p_id:+id,p_reponse:b.dataset.r,p_texte:txa}),"Réponse enregistrée : "+REP[b.dataset.r]);
+  if(b.dataset.act==="noter"&&/^\d+$/.test(id)){if(!txa){toast("Écris ta réponse d'abord");return} run(sb.rpc("repondre_tache",{p_id:+id,p_texte:txa}),"Réponse envoyée")}
+  if(b.dataset.act==="demain"&&/^\d+$/.test(id)){const tk=data.taches.find(x=>String(x.id)===id);const d=new Date();d.setDate(d.getDate()+1);const s2=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");run(sb.from("taches").update({pour_quand:s2,statut:tk?.statut==="bloque"?"a_faire":tk?.statut,maj_le:nowIso()}).eq("id",+id),"Reporté à demain")}
+  if(b.dataset.act==="incompris"&&/^\d+$/.test(id)){const tk=data.taches.find(x=>String(x.id)===id);if(tk&&tk.agent_id){showView("salle");envoyer(tk.agent_id,`Je ne comprends pas la tâche « ${tk.quoi} ». Explique-moi simplement ce que tu attends de moi et pourquoi.`)}}
+  if(b.dataset.act==="lock"&&/^d\d+$/.test(id)){const d=data.dossiers.find(x=>x.id===id);run(sb.from("dossiers").update({verrouille:!d?.verrouille,maj_le:nowIso()}).eq("id",id),"Verrouillage modifié")}
+  if(b.dataset.act==="gpt")ouvrirChatGPT(b.dataset.agent2||agentOuvert,$("chat-in")?.value||"");
+});
+
+function calc(){
+  const v=id=>Math.max(0,parseFloat($(id).value)||0), eur=n=>Math.round(n).toLocaleString("fr-FR")+" €";
+  const f1=v("c-missions")*v("c-prix")*12, f2=v("c-rem"), f3=v("c-mrr"), ca=f1+f2+f3, ch=v("c-charges");
+  $("r-f1").textContent=eur(f1);$("r-f2").textContent=eur(f2);$("r-f3").textContent=eur(f3);$("r-ca").textContent=eur(ca);$("r-ch").textContent="− "+eur(ch);$("r-res").textContent=eur(ca-ch);
+}
+["c-missions","c-prix","c-rem","c-mrr","c-charges"].forEach(id=>$(id).addEventListener("input",calc)); calc();
+
+let saved=null;try{saved=localStorage.getItem("salle-tab")}catch(e){}
+showTab(saved&&$("p-"+saved)?saved:"plan");
+let sv=null;try{sv=localStorage.getItem("salle-view")}catch(e){}
+showView(sv&&$("v-"+sv)?sv:"salle");
+document.querySelectorAll(".vbtn").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+document.addEventListener("click",e=>{const b=e.target.closest("[data-brief]");if(b){if(data)genererNote("brief");return}const sc=e.target.closest("[data-scroll]");if(sc){$(sc.dataset.scroll).scrollIntoView({behavior:"smooth"});return}const vg=e.target.closest("[data-view-go]");if(vg){showView(vg.dataset.viewGo);if(vg.dataset.tabGo)showTab(vg.dataset.tabGo)}});
+$("cmd").addEventListener("submit",e=>{e.preventDefault();const id=$("cmd-agent").value,tx=$("cmd-text").value.trim();if(!id||!tx||!data)return;showView("salle");envoyer(id,tx)});
+$("cmd-gpt").addEventListener("click",()=>ouvrirChatGPT($("cmd-agent").value,$("cmd-text").value));
+$("cmd-text").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("cmd").requestSubmit()}});
+
+async function demarrer(){
+  const {data:{session}}=await sb.auth.getSession();
+  $("login").hidden=!!session; document.body.classList.toggle("locked",!session);
+  if(session){$("who").textContent=session.user.email;load()}
+}
+$("login-form").addEventListener("submit",async e=>{
+  e.preventDefault(); const em=$("l-email").value.trim(), pw=$("l-pass").value; $("l-msg").textContent="Connexion…";
+  const {error}=await sb.auth.signInWithPassword({email:em,password:pw});
+  if(error){$("l-msg").textContent=error.message.includes("confirm")?"Adresse pas encore confirmée : ouvre le lien reçu par e-mail, puis reconnecte-toi.":"Identifiants refusés. Vérifie l'adresse et le mot de passe, ou crée ton accès.";return}
+  $("l-msg").textContent=""; demarrer();
+});
+$("l-signup").addEventListener("click",async()=>{
+  const em=$("l-email").value.trim(), pw=$("l-pass").value; if(!em||pw.length<8){$("l-msg").textContent="Saisis ton adresse et un mot de passe d'au moins 8 caractères.";return}
+  const {error}=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:location.origin+location.pathname}});
+  $("l-msg").textContent=error?("Création refusée : "+error.message):"Accès créé. Ouvre le lien reçu par e-mail pour confirmer, puis connecte-toi ici.";
+});
+$("btn-logout").addEventListener("click",async()=>{await sb.auth.signOut();location.reload()});
+demarrer();
+</script>
+
+</body>
+</html>
