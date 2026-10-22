@@ -285,6 +285,8 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
 .btn.gpt{background:#E7F7EF;border-color:#BFE8D2;color:#0F5132}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body class="locked">
 <div id="login" class="loginwrap" hidden>
@@ -304,6 +306,7 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
     <div class="views" role="tablist" aria-label="Espaces">
       <button class="vbtn" data-view="salle" aria-selected="true">Salle de conseil</button>
       <button class="vbtn" data-view="bureau" aria-selected="false">Mon bureau<span class="badge" id="b-bureau" hidden></span></button>
+      <button class="vbtn" data-view="documents" aria-selected="false">Documents<span class="badge" id="b-docs" hidden></span></button>
       <button class="vbtn" data-view="fond" aria-selected="false">Plans, dossiers et consignes</button>
     </div>
     <div class="clock"><span id="today"></span><b id="time"></b></div>
@@ -361,6 +364,25 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
       <section><div class="sec-head"><h2>Réponses</h2><span class="small">des agents</span></div><div class="list" id="reponses"></div></section>
       <section id="jour"><div class="sec-head"><h2>Le bureau aujourd'hui</h2><span class="small">qui fait quoi</span></div><div class="list" id="jour-list"></div></section>
     </div>
+  </div>
+</div>
+
+<!-- DOCUMENTS -->
+<div id="v-documents" hidden>
+  <div class="wrapw stack" style="padding-block:18px 120px">
+    <section class="objcard">
+      <div class="sec-head"><h2>Confier un document à un agent</h2><p class="hint">PDF, Word ou texte. Le texte est extrait ici, dans ton navigateur, puis rangé dans la base. L'agent l'analyse à son prochain passage.</p></div>
+      <form id="doc-form" class="list">
+        <div class="calc">
+          <label for="doc-file">Document<input id="doc-file" type="file" accept=".pdf,.docx,.txt,.md,.csv" required></label>
+          <label for="doc-agent">Agent<select id="doc-agent"></select></label>
+          <label for="doc-dossier">Dossier<select id="doc-dossier"></select></label>
+        </div>
+        <label for="doc-consigne">Ta demande<textarea id="doc-consigne" maxlength="2000" required placeholder="Ex. : vérifie la cohérence des prix, renforce les arguments, dis-moi ce qui manque pour un dirigeant de PME"></textarea></label>
+        <div class="row"><button class="btn primary" type="submit" id="doc-send">Confier le document</button><span class="small" id="doc-msg" role="status"></span></div>
+      </form>
+    </section>
+    <section><div class="sec-head"><h2>Documents confiés</h2><span class="small" id="doc-n"></span></div><div class="list" id="doc-list"></div></section>
   </div>
 </div>
 
@@ -608,7 +630,7 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,a
 function permButtons(){return `<button class="btn primary" type="button" id="btn-retry">Actualiser</button>`}
 async function load(){
   if(busy)return; busy=true; $("btn-refresh").disabled=true; $("maj").textContent="Lecture de la base…";
-  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; notice(null); render(); $("maj").textContent="Base lue le "+fdt(data.maj) }
+  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; const dr=await sb.from("documents").select("id,agent_id,dossier_id,nom,consigne,statut,cree_le").order("cree_le",{ascending:false}).limit(40); data.documents=dr.data||[]; notice(null); render(); renderDocs(); $("maj").textContent="Base lue le "+fdt(data.maj) }
   catch(e){ notice("<p>Lecture impossible : "+esc(e.message||"erreur")+"</p>"+permButtons(),true); $("maj").textContent="Base non lue" }
   finally{busy=false;$("btn-refresh").disabled=false}
 }
@@ -719,9 +741,51 @@ function renderBureau(){
   $("jour-list").innerHTML=data.agents.filter(a=>ouvertes.some(t=>t.agent_id===a.id)).map(a=>{const i=data.agents.indexOf(a);const tt=ouvertes.filter(t=>t.agent_id===a.id).sort((x,y)=>(x.pour_quand||"9").localeCompare(y.pour_quand||"9"));return `<article class="item"><div class="svc">${esc(a.service)}</div>${tt.slice(0,4).map(t=>`<div class="who2"><div class="av ${GRAD(i)}" style="color:#fff">${esc(initiale(a.prenom))}</div><div style="min-width:0"><strong>${esc(a.prenom)}</strong> · ${esc(t.quoi)}<div class="small">${t.pour_quand?fdate(t.pour_quand):"sans date"} · ${ST_T[t.statut]}</div></div></div>`).join("")}${tt.length>4?`<button class="btn" data-agent="${esc(a.id)}">+ ${tt.length-4} autre(s)</button>`:""}</article>`}).join("")||`<div class="empty">Aucune tâche ouverte.</div>`;
   $("k-leads").textContent=data.nleads||0; $("k-clients").textContent=data.nclients||0;
 }
+function renderDocs(){
+  const sa=$("doc-agent"),sd=$("doc-dossier"),va=sa.value,vd=sd.value;
+  sa.innerHTML=data.agents.map(a=>`<option value="${esc(a.id)}">${esc(a.prenom)} · ${esc(a.service)}</option>`).join("");
+  sa.value=va&&ag(va)?va:(ag("commercial")?"commercial":data.agents[0]?.id);
+  sd.innerHTML=`<option value="">Aucun en particulier</option>`+data.dossiers.filter(d=>d.statut!=="clos").map(d=>`<option value="${esc(d.id)}">${esc(d.titre)}</option>`).join("");
+  sd.value=vd||"";
+  const docs=data.documents||[], att=docs.filter(d=>d.statut==="a_analyser").length;
+  $("b-docs").textContent=att; $("b-docs").hidden=!att; $("doc-n").textContent=docs.length?docs.length+" document(s)":"";
+  $("doc-list").innerHTML=docs.length?docs.map(d=>{const rep=data.echanges.filter(e=>e.auteur==="agent"&&e.agent_id===d.agent_id&&new Date(e.cree_le)>new Date(d.cree_le)).slice(0,1)[0];return `<article class="item ${d.statut==="a_analyser"?"urgent":""}">
+    <div class="row"><span class="title" style="flex:1;min-width:0;overflow-wrap:anywhere">${esc(d.nom)}</span><span class="pill ${d.statut==="analyse"?"fait":"a_faire"}">${d.statut==="analyse"?"Analysé":"En attente d'analyse"}</span></div>
+    <div class="small">Confié à ${esc(agentName(d.agent_id))} le ${fdt(d.cree_le)}${d.dossier_id?" · "+esc(dTitre(d.dossier_id)):""}</div>
+    ${d.consigne?`<div class="next small">${esc(d.consigne)}</div>`:""}
+    <div class="row"><button class="btn" data-agent="${esc(d.agent_id)}">${d.statut==="analyse"?"Voir la réponse de ":"Ouvrir la discussion avec "}${esc(agentName(d.agent_id))}</button></div></article>`}).join(""):`<div class="empty">Aucun document confié pour l'instant.</div>`;
+}
+async function extraireTexte(f){
+  const nom=f.name.toLowerCase();
+  if(nom.endsWith(".pdf")){
+    if(!window.pdfjsLib)throw new Error("lecteur PDF non chargé");
+    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise; let out="";
+    for(let i=1;i<=Math.min(pdf.numPages,60);i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out+=`\n--- Page ${i} ---\n`+tc.items.map(x=>x.str+(x.hasEOL?"\n":" ")).join("")}
+    return out.trim();
+  }
+  if(nom.endsWith(".docx")){ if(!window.mammoth)throw new Error("lecteur Word non chargé"); const r=await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()}); return r.value.trim() }
+  return (await f.text()).trim();
+}
+$("doc-form").addEventListener("submit",async e=>{
+  e.preventDefault(); const f=$("doc-file").files[0], agent=$("doc-agent").value, dos=$("doc-dossier").value||null, cons=$("doc-consigne").value.trim();
+  if(!f||!agent||!cons)return; if(f.size>15*1024*1024){$("doc-msg").textContent="Fichier trop lourd (15 Mo maximum).";return}
+  $("doc-send").disabled=true; $("doc-msg").textContent="Lecture du document…";
+  try{
+    let txt=await extraireTexte(f);
+    if(!txt||txt.length<20)throw new Error("aucun texte lisible (document scanné ?). Envoie plutôt une version Word ou un PDF avec du texte.");
+    if(txt.length>200000)txt=txt.slice(0,200000)+"\n[… document tronqué à 200 000 caractères]";
+    $("doc-msg").textContent="Envoi à "+agentName(agent)+"…";
+    const {data:ins,error}=await sb.from("documents").insert({agent_id:agent,dossier_id:dos,nom:f.name,type_fichier:f.type||null,consigne:cons,contenu:txt}).select("id").single();
+    if(error)throw error;
+    const ok=await run(sb.from("echanges").insert({agent_id:agent,dossier_id:dos,auteur:"frederic",texte:`Document n°${ins.id} « ${f.name} » à analyser. Ma demande : ${cons}`,en_attente:true}),"Document confié à "+agentName(agent)+" : analyse à son prochain passage");
+    if(ok){$("doc-form").reset();$("doc-msg").textContent=""}
+  }catch(err){$("doc-msg").textContent="Échec : "+(err.message||err)}
+  finally{$("doc-send").disabled=false}
+});
 function showView(v){
   document.querySelectorAll(".vbtn").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
-  ["salle","bureau","fond"].forEach(x=>$("v-"+x).hidden=x!==v);
+  ["salle","bureau","documents","fond"].forEach(x=>$("v-"+x).hidden=x!==v);
   try{localStorage.setItem("salle-view",v)}catch(e){}
 }
 function tick(){const n=new Date();$("today").textContent=n.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("time").textContent=n.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
