@@ -220,6 +220,8 @@ nav.tabs{top:calc(env(safe-area-inset-top,0px) + 88px)}
 .pic .st{position:absolute;right:2px;bottom:2px;width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#94A3B8}
 .pic .st.on{background:#22C3A6}
 .seat.lead2{flex-basis:124px;margin-bottom:34px}
+.seat.humain{cursor:default}
+.seat.humain .card2{border-color:var(--orange,#F28C28)}
 .seat.lead2 .pic{width:116px;height:116px;font-size:34px}
 .seat[aria-pressed="true"] .pic{box-shadow:0 0 0 4px var(--orange),0 6px 18px rgba(0,0,0,.45)}
 .seat:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:8px}
@@ -701,7 +703,11 @@ function renderSalle(){
     <button class="seat ${a===dir?"lead2":""}" data-agent="${esc(a.id)}" aria-pressed="${agentOuvert===a.id}" title="${esc(a.prenom)} · ${esc(a.role||a.service)}">
       <span class="card2"><span class="nm">${esc(a.prenom)}</span><span class="rl">${esc(a.role||a.service)}</span><span class="stt"><span class="dot2 ${on?"on":""}"></span>${on?"A travaillé aujourd'hui":"En pause"}</span></span>
       <span class="pic ${GRAD(i)}">${portrait(a,i)}<span class="st ${on?"on":""}"></span></span>
-    </button>`}).join("");
+    </button>`}).join("")+(data.membres||[]).filter(m=>m.role!=="proprietaire").map((m,k)=>`
+    <div class="seat humain" title="${esc(m.nom||m.email)} · ${esc(ROLES_MEMBRES[m.role]||m.role)}">
+      <span class="card2"><span class="nm">${esc(m.nom||m.email)}</span><span class="rl">${esc((ROLES_MEMBRES[m.role]||m.role).split(" · ")[0])}</span><span class="stt"><span class="dot2 on"></span>Équipe</span></span>
+      <span class="pic ${GRAD(k+3)}">${esc(initiale(m.nom||m.email))}<span class="st on"></span></span>
+    </div>`).join("");
   // Prochaine réunion
   const sujets=data.avals.filter(v=>!v.reponse).length+ouvertes.filter(t=>t.statut==="bloque").length+ouvertes.filter(t=>{const d=daysTo(t.pour_quand);return d!==null&&d<=7}).length;
   $("meeting").innerHTML=`<span class="tag">Pas en cours</span><h3>Prochaine réunion</h3><div class="big2">Comité de direction</div><p>${fjour(prochainLundi())} · 30 minutes</p><p>${sujets} sujet(s) à l'ordre du jour</p><p>Comité stratégique : ${fjour(premierLundiMois())}</p><small>L'ordre du jour se prépare dans Plans, dossiers et consignes → Pilotage.</small>`;
