@@ -603,6 +603,9 @@ const REGLES=`Règles communes de PROUX AUDIT (conseil IT et Diagnostic Cyber po
 - Objectif an 1 (scénario réaliste fixé en mars 2026, à recaler avec la nouvelle grille) : 195 960 € HT jusqu'au 31/03/2027 = diagnostics ponctuels 160 320 € (4 par mois à 3 340 € en moyenne) + remédiation et retests 13 540 € + abonnements 22 100 € (3 900 € par mois visés au 12e mois) ; charges environ 38 000 €.`;
 let dossierChoisi="";
 let data=null, filtre="ouverts", busy=false, agentOuvert=null, chatBusy=false;
+const ROLES_MEMBRES={commerce_marketing:"Commerce & Marketing · avec Léa et Thomas"};
+let moi=null;
+const signe=txt=>moi&&moi.role!=="proprietaire"?`${(moi.nom||moi.email).split(" ")[0]} (${(ROLES_MEMBRES[moi.role]||moi.role).split(" · ")[0]}) : ${txt}`:txt;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const q=s=>"'"+String(s).replace(/'/g,"''")+"'";
@@ -630,7 +633,7 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,a
 function permButtons(){return `<button class="btn primary" type="button" id="btn-retry">Actualiser</button>`}
 async function load(){
   if(busy)return; busy=true; $("btn-refresh").disabled=true; $("maj").textContent="Lecture de la base…";
-  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; const dr=await sb.from("documents").select("id,agent_id,dossier_id,nom,consigne,statut,cree_le").order("cree_le",{ascending:false}).limit(40); data.documents=dr.data||[]; notice(null); render(); renderDocs(); $("maj").textContent="Base lue le "+fdt(data.maj) }
+  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; {const em=(await sb.auth.getSession()).data.session?.user?.email?.toLowerCase(); moi=(d.membres||[]).find(m=>m.email?.toLowerCase()===em)||null} const dr=await sb.from("documents").select("id,agent_id,dossier_id,nom,consigne,statut,cree_le").order("cree_le",{ascending:false}).limit(40); data.documents=dr.data||[]; notice(null); render(); renderDocs(); $("maj").textContent="Base lue le "+fdt(data.maj) }
   catch(e){ notice("<p>Lecture impossible : "+esc(e.message||"erreur")+"</p>"+permButtons(),true); $("maj").textContent="Base non lue" }
   finally{busy=false;$("btn-refresh").disabled=false}
 }
@@ -665,7 +668,9 @@ function render(){
     return `<button class="ag ${a.rattache_a?"":"adj"}" data-agent="${esc(a.id)}" aria-pressed="${agentOuvert===a.id}">
       <div class="top"><div class="av ${avClass(i)}">${esc(initiale(a.prenom))}</div><div><div class="name">${esc(a.prenom)}</div><div class="role">${esc(a.role||a.service)}</div></div></div>
       <div class="stats"><span><b>${ts.length}</b> tâche(s)</span>${nx?`<span>prochaine : <b>${fdate(nx.pour_quand)}</b></span>`:""}${data.echanges.some(e=>e.agent_id===a.id)?`<span>· échanges</span>`:""}</div></button>`};
-  $("org").innerHTML=`<div class="lvl"><div class="ag ceo adj"><div class="top"><div class="av">F</div><div><div class="name">Frédéric PROUX</div><div class="role">Directeur général · donne l'aval</div></div></div></div></div>
+  const humains=(data.membres||[]).filter(m=>m.role!=="proprietaire");
+  const carteHumain=m=>`<div class="ag ceo adj"><div class="top"><div class="av">${esc(initiale(m.nom||m.email))}</div><div><div class="name">${esc(m.nom||m.email)}</div><div class="role">${esc(ROLES_MEMBRES[m.role]||m.role)}</div></div></div></div>`;
+  $("org").innerHTML=`<div class="lvl"><div class="ag ceo adj"><div class="top"><div class="av">F</div><div><div class="name">Frédéric PROUX</div><div class="role">Directeur général · donne l'aval</div></div></div></div>${humains.map(carteHumain).join("")}</div>
     <div class="stem"></div>${dir?`<div class="lvl">${card(dir,1)}</div><div class="stem"></div>`:""}
     <div class="team">${equipe.map((a,i)=>card(a,i+2)).join("")}</div>`;
 
@@ -778,7 +783,7 @@ $("doc-form").addEventListener("submit",async e=>{
     $("doc-msg").textContent="Envoi à "+agentName(agent)+"…";
     const {data:ins,error}=await sb.from("documents").insert({agent_id:agent,dossier_id:dos,nom:f.name,type_fichier:f.type||null,consigne:cons,contenu:txt}).select("id").single();
     if(error)throw error;
-    const ok=await run(sb.from("echanges").insert({agent_id:agent,dossier_id:dos,auteur:"frederic",texte:`Document n°${ins.id} « ${f.name} » à analyser. Ma demande : ${cons}`,en_attente:true}),"Document confié à "+agentName(agent)+" : analyse à son prochain passage");
+    const ok=await run(sb.from("echanges").insert({agent_id:agent,dossier_id:dos,auteur:"frederic",texte:signe(`Document n°${ins.id} « ${f.name} » à analyser. Ma demande : ${cons}`),en_attente:true}),"Document confié à "+agentName(agent)+" : analyse à son prochain passage");
     if(ok){$("doc-form").reset();$("doc-msg").textContent=""}
   }catch(err){$("doc-msg").textContent="Échec : "+(err.message||err)}
   finally{$("doc-send").disabled=false}
@@ -873,13 +878,13 @@ async function envoyer(agentId,texte){
   const a=ag(agentId||agentOuvert), txt=(texte??$("chat-in")?.value??"").trim(); if(!a||!txt)return;
   if(agentOuvert!==a.id){agentOuvert=a.id;renderAgent();renderSalle()}
   const dsel=/^d\d+$/.test(dossierChoisi)?dossierChoisi:null;
-  const ok=await run(sb.from("echanges").insert({agent_id:a.id,dossier_id:dsel,auteur:"frederic",texte:txt,en_attente:true}),"Message transmis à "+a.prenom+" : réponse à son prochain passage");
+  const ok=await run(sb.from("echanges").insert({agent_id:a.id,dossier_id:dsel,auteur:"frederic",texte:signe(txt),en_attente:true}),"Message transmis à "+a.prenom+" : réponse à son prochain passage");
   if(ok){ if($("chat-in"))$("chat-in").value=""; if(texte!==undefined)$("cmd-text").value="" }
 }
 async function genererNote(type){
   const dir=data.agents.find(x=>!x.rattache_a)||ag("direction");
   const txt=type==="brief"?"Demande : prépare le point du jour (ce qui presse, ce qui avance ou bloque, ce qui attend ma décision) et enregistre-le en compte rendu de type brief.":"Demande : prépare l'ordre du jour du comité de direction de lundi et enregistre-le en compte rendu de type comite.";
-  await run(sb.from("echanges").insert({agent_id:dir.id,auteur:"frederic",texte:txt,en_attente:true}),"Demande transmise à Alexandre : réponse à son prochain passage");
+  await run(sb.from("echanges").insert({agent_id:dir.id,auteur:"frederic",texte:signe(txt),en_attente:true}),"Demande transmise à Alexandre : réponse à son prochain passage");
 }
 function ouvrirChatGPT(agentId,texte){
   const a=ag(agentId)||ag("direction");
