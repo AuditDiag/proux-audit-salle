@@ -606,7 +606,11 @@ const REGLES=`Règles communes de PROUX AUDIT (conseil IT et Diagnostic Cyber po
 let dossierChoisi="";
 let data=null, filtre="ouverts", busy=false, agentOuvert=null, chatBusy=false;
 const ROLES_MEMBRES={commerce_marketing:"Commerce & Marketing · avec Léa et Thomas"};
-let moi=null;
+let moi=null, humainOuvert=null;
+const monMail=()=>(moi?.email||"").toLowerCase();
+const autresHumains=()=>(data?.membres||[]).filter(m=>m.email.toLowerCase()!==monMail());
+const nonLus=em=>(data?.messages||[]).filter(x=>!x.lu&&x.de.toLowerCase()===em.toLowerCase()&&x.a.toLowerCase()===monMail()).length;
+const roleHumain=m=>m.role==="proprietaire"?"Directeur général":(ROLES_MEMBRES[m.role]||m.role).split(" · ")[0];
 const signe=txt=>moi&&moi.role!=="proprietaire"?`${(moi.nom||moi.email).split(" ")[0]} (${(ROLES_MEMBRES[moi.role]||moi.role).split(" · ")[0]}) : ${txt}`:txt;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -635,7 +639,7 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,a
 function permButtons(){return `<button class="btn primary" type="button" id="btn-retry">Actualiser</button>`}
 async function load(){
   if(busy)return; busy=true; $("btn-refresh").disabled=true; $("maj").textContent="Lecture de la base…";
-  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; {const em=(await sb.auth.getSession()).data.session?.user?.email?.toLowerCase(); moi=(d.membres||[]).find(m=>m.email?.toLowerCase()===em)||null} const dr=await sb.from("documents").select("id,agent_id,dossier_id,nom,consigne,statut,cree_le").order("cree_le",{ascending:false}).limit(40); data.documents=dr.data||[]; notice(null); render(); renderDocs(); $("maj").textContent="Base lue le "+fdt(data.maj) }
+  try{ const {data:d,error}=await sb.rpc("salle_lecture"); if(error)throw error; if(!d||!d.agents?.length)throw {message:"Aucune donnée lisible : ton adresse n'est peut-être pas autorisée."}; data=d; {const em=(await sb.auth.getSession()).data.session?.user?.email?.toLowerCase(); moi=(d.membres||[]).find(m=>m.email?.toLowerCase()===em)||null} const dr=await sb.from("documents").select("id,agent_id,dossier_id,nom,consigne,statut,cree_le").order("cree_le",{ascending:false}).limit(40); data.documents=dr.data||[]; {const mr=await sb.from("messages").select("id,de,a,texte,lu,cree_le").order("cree_le",{ascending:true}).limit(500); data.messages=mr.data||[]} notice(null); render(); renderDocs(); $("maj").textContent="Base lue le "+fdt(data.maj) }
   catch(e){ notice("<p>Lecture impossible : "+esc(e.message||"erreur")+"</p>"+permButtons(),true); $("maj").textContent="Base non lue" }
   finally{busy=false;$("btn-refresh").disabled=false}
 }
@@ -670,9 +674,11 @@ function render(){
     return `<button class="ag ${a.rattache_a?"":"adj"}" data-agent="${esc(a.id)}" aria-pressed="${agentOuvert===a.id}">
       <div class="top"><div class="av ${avClass(i)}">${esc(initiale(a.prenom))}</div><div><div class="name">${esc(a.prenom)}</div><div class="role">${esc(a.role||a.service)}</div></div></div>
       <div class="stats"><span><b>${ts.length}</b> tâche(s)</span>${nx?`<span>prochaine : <b>${fdate(nx.pour_quand)}</b></span>`:""}${data.echanges.some(e=>e.agent_id===a.id)?`<span>· échanges</span>`:""}</div></button>`};
-  const humains=(data.membres||[]).filter(m=>m.role!=="proprietaire");
-  const carteHumain=m=>`<div class="ag ceo adj"><div class="top"><div class="av">${esc(initiale(m.nom||m.email))}</div><div><div class="name">${esc(m.nom||m.email)}</div><div class="role">${esc(ROLES_MEMBRES[m.role]||m.role)}</div></div></div></div>`;
-  $("org").innerHTML=`<div class="lvl"><div class="ag ceo adj"><div class="top"><div class="av">F</div><div><div class="name">Frédéric PROUX</div><div class="role">Directeur général · donne l'aval</div></div></div></div>${humains.map(carteHumain).join("")}</div>
+  const humains=autresHumains().filter(m=>m.role!=="proprietaire"), proprio=(data.membres||[]).find(m=>m.role==="proprietaire");
+  const nl=em=>{const n=nonLus(em);return n?`<span class="badge">${n}</span>`:""};
+  const carteHumain=m=>`<button type="button" class="ag ceo adj humain" data-humain="${esc(m.email)}"><div class="top"><div class="av">${esc(initiale(m.nom||m.email))}</div><div><div class="name">${esc(m.nom||m.email)} ${nl(m.email)}</div><div class="role">${esc(ROLES_MEMBRES[m.role]||m.role)}</div></div></div></button>`;
+  const fredClic=proprio&&proprio.email.toLowerCase()!==monMail();
+  $("org").innerHTML=`<div class="lvl"><${fredClic?`button type="button" data-humain="${esc(proprio.email)}"`:"div"} class="ag ceo adj ${fredClic?"humain":""}"><div class="top"><div class="av">F</div><div><div class="name">Frédéric PROUX ${fredClic?nl(proprio.email):""}</div><div class="role">Directeur général · donne l'aval</div></div></div></${fredClic?"button":"div"}>${humains.map(carteHumain).join("")}</div>
     <div class="stem"></div>${dir?`<div class="lvl">${card(dir,1)}</div><div class="stem"></div>`:""}
     <div class="team">${equipe.map((a,i)=>card(a,i+2)).join("")}</div>`;
 
@@ -703,11 +709,11 @@ function renderSalle(){
     <button class="seat ${a===dir?"lead2":""}" data-agent="${esc(a.id)}" aria-pressed="${agentOuvert===a.id}" title="${esc(a.prenom)} · ${esc(a.role||a.service)}">
       <span class="card2"><span class="nm">${esc(a.prenom)}</span><span class="rl">${esc(a.role||a.service)}</span><span class="stt"><span class="dot2 ${on?"on":""}"></span>${on?"A travaillé aujourd'hui":"En pause"}</span></span>
       <span class="pic ${GRAD(i)}">${portrait(a,i)}<span class="st ${on?"on":""}"></span></span>
-    </button>`}).join("")+(data.membres||[]).filter(m=>m.role!=="proprietaire").map((m,k)=>`
-    <div class="seat humain" title="${esc(m.nom||m.email)} · ${esc(ROLES_MEMBRES[m.role]||m.role)}">
-      <span class="card2"><span class="nm">${esc(m.nom||m.email)}</span><span class="rl">${esc((ROLES_MEMBRES[m.role]||m.role).split(" · ")[0])}</span><span class="stt"><span class="dot2 on"></span>Équipe</span></span>
+    </button>`}).join("")+autresHumains().map((m,k)=>{const n=nonLus(m.email);return `
+    <button type="button" class="seat humain" data-humain="${esc(m.email)}" aria-pressed="${humainOuvert===m.email}" title="Écrire à ${esc(m.nom||m.email)}">
+      <span class="card2"><span class="nm">${esc(m.nom||m.email)}</span><span class="rl">${esc(roleHumain(m))}</span><span class="stt"><span class="dot2 on"></span>${n?`${n} message${n>1?"s":""} non lu${n>1?"s":""}`:"Écrire"}</span></span>
       <span class="pic ${GRAD(k+3)}">${esc(initiale(m.nom||m.email))}<span class="st on"></span></span>
-    </div>`).join("");
+    </button>`}).join("");
   // Prochaine réunion
   const sujets=data.avals.filter(v=>!v.reponse).length+ouvertes.filter(t=>t.statut==="bloque").length+ouvertes.filter(t=>{const d=daysTo(t.pour_quand);return d!==null&&d<=7}).length;
   $("meeting").innerHTML=`<span class="tag">Pas en cours</span><h3>Prochaine réunion</h3><div class="big2">Comité de direction</div><p>${fjour(prochainLundi())} · 30 minutes</p><p>${sujets} sujet(s) à l'ordre du jour</p><p>Comité stratégique : ${fjour(premierLundiMois())}</p><small>L'ordre du jour se prépare dans Plans, dossiers et consignes → Pilotage.</small>`;
@@ -826,7 +832,35 @@ function renderDossiers(){
     </article>`).join(""):`<div class="empty">Aucun dossier dans ce filtre.</div>`;
 }
 
+function renderHumain(){
+  const p=$("agent-panel"), m=(data.membres||[]).find(x=>x.email===humainOuvert);
+  if(!m){humainOuvert=null;p.hidden=true;p.innerHTML="";return}
+  const em=m.email.toLowerCase(), draft=$("hum-in")?.value||"";
+  const fil=(data.messages||[]).filter(x=>(x.de.toLowerCase()===em&&x.a.toLowerCase()===monMail())||(x.a.toLowerCase()===em&&x.de.toLowerCase()===monMail())).slice(-60);
+  const prenom=(m.nom||m.email).split(" ")[0];
+  p.hidden=false;
+  p.innerHTML=`<div class="panel">
+    <div class="head"><div class="av">${esc(initiale(m.nom||m.email))}</div><div style="flex:1;min-width:0"><h2>${esc(m.nom||m.email)}</h2><div class="small">${esc(m.role==="proprietaire"?"Directeur général":(ROLES_MEMBRES[m.role]||m.role))}</div></div><button class="btn" data-close>Fermer</button></div>
+    <div class="chat">
+      <div class="eyebrow">Conversation avec ${esc(prenom)}</div>
+      <div class="msgs" id="msgs">${fil.length?fil.map(x=>{const mien=x.de.toLowerCase()===monMail();return `<div class="msg ${mien?"me":"ag2"}">${esc(x.texte)}<span class="when">${mien?"Toi":esc(prenom)} · ${fdt(x.cree_le)}${mien&&x.lu?" · lu":""}</span></div>`}).join(""):`<div class="small">Aucun message pour l'instant. Écris à ${esc(prenom)} : le message l'attend dans la salle, avec une pastille sur ta carte.</div>`}</div>
+      <form id="hum-form" class="list">
+        <label for="hum-in" class="small">Ton message à ${esc(prenom)}</label>
+        <textarea id="hum-in" maxlength="3000" placeholder="Ex. : peux-tu préparer un post LinkedIn sur le Diagnostic Cyber ?">${esc(draft)}</textarea>
+        <div class="row"><button class="btn primary" type="submit">Envoyer</button><span class="small">Ctrl + Entrée pour envoyer · nouveaux messages visibles avec « Actualiser »</span></div>
+      </form>
+    </div></div>`;
+  const ms=$("msgs"); if(ms)ms.scrollTop=ms.scrollHeight;
+  const aLire=(data.messages||[]).filter(x=>!x.lu&&x.de.toLowerCase()===em&&x.a.toLowerCase()===monMail());
+  if(aLire.length){aLire.forEach(x=>x.lu=true);sb.from("messages").update({lu:true}).in("id",aLire.map(x=>x.id)).then(()=>{renderSalle()})}
+}
+async function envoyerHumain(){
+  const txt=($("hum-in")?.value||"").trim(); if(!txt||!humainOuvert||!moi)return;
+  const ok=await run(sb.from("messages").insert({de:moi.email,a:humainOuvert,texte:txt}),"Message envoyé");
+  if(ok&&$("hum-in"))$("hum-in").value="";
+}
 function renderAgent(){
+  if(humainOuvert)return renderHumain();
   const p=$("agent-panel"); const a=ag(agentOuvert);
   if(!a){p.hidden=true;p.innerHTML="";return}
   const i=data.agents.indexOf(a);
@@ -909,13 +943,16 @@ $("filters").addEventListener("click",e=>{const b=e.target.closest("[data-f]");i
 $("btn-refresh").addEventListener("click",load);
 $("btn-brief").addEventListener("click",()=>genererNote("brief"));
 $("btn-comite").addEventListener("click",()=>genererNote("comite"));
-document.addEventListener("submit",e=>{if(e.target.id==="chat-form"){e.preventDefault();envoyer()}});
+document.addEventListener("submit",e=>{if(e.target.id==="chat-form"){e.preventDefault();envoyer()}if(e.target.id==="hum-form"){e.preventDefault();envoyerHumain()}});
+setInterval(()=>{if(humainOuvert&&!busy&&document.visibilityState==="visible")load()},45000);
+document.addEventListener("keydown",e=>{if(e.target.id==="hum-in"&&e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();envoyerHumain()}});
 document.addEventListener("keydown",e=>{if(e.target.id==="chat-in"&&e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();envoyer()}});
 document.addEventListener("click",async e=>{
   const t=e.target;
   if(t.id==="btn-retry")return load();
-  const card=t.closest("[data-agent]"); if(card){const id2=card.dataset.agent;const was=$("v-salle").hidden;showView("salle");agentOuvert=(agentOuvert===id2&&!was&&card.classList.contains("seat"))?null:id2;$("cmd-agent").value=agentOuvert||$("cmd-agent").value;propositions=[];render();if(agentOuvert)$("agent-panel").scrollIntoView({behavior:"smooth",block:"start"});return}
-  if(t.closest("[data-close]")){agentOuvert=null;propositions=[];render();return}
+  const hum=t.closest("[data-humain]"); if(hum){const em=hum.dataset.humain;showView("salle");agentOuvert=null;humainOuvert=humainOuvert===em?null:em;propositions=[];render();if(humainOuvert)$("agent-panel").scrollIntoView({behavior:"smooth",block:"start"});return}
+  const card=t.closest("[data-agent]"); if(card){humainOuvert=null;const id2=card.dataset.agent;const was=$("v-salle").hidden;showView("salle");agentOuvert=(agentOuvert===id2&&!was&&card.classList.contains("seat"))?null:id2;$("cmd-agent").value=agentOuvert||$("cmd-agent").value;propositions=[];render();if(agentOuvert)$("agent-panel").scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(t.closest("[data-close]")){agentOuvert=null;humainOuvert=null;propositions=[];render();return}
   const pr=t.closest("[data-prop]"); if(pr){const k=+pr.dataset.prop,p=propositions[k];if(!p)return;
     if(pr.dataset.ok){const ok=p.type==="aval"
       ?await run(sb.from("avals").insert({entite:"proux_audit",dossier_id:p.dossier_id,demande:p.quoi,propose_par:agentName(agentOuvert)}),"Aval ajouté à la file")
