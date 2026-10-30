@@ -294,10 +294,9 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
 <div id="login" class="loginwrap" hidden>
   <form id="login-form" class="loginbox">
     <div class="logo"><span class="mark">PA</span><div><strong>PROUX AUDIT</strong><small>Salle de conseil · accès réservé</small></div></div>
-    <label for="l-email">Adresse e-mail<input id="l-email" type="email" autocomplete="username" required value="audit.proux@outlook.com"></label>
+    <label for="l-email">Adresse e-mail<input id="l-email" type="email" autocomplete="username" required></label>
     <label for="l-pass">Mot de passe<input id="l-pass" type="password" autocomplete="current-password" required minlength="8"></label>
     <button class="btn primary" type="submit">Se connecter</button>
-    <button class="btn" type="button" id="l-signup">Première fois : créer mon accès</button>
     <p class="small" id="l-msg" role="status"></p>
   </form>
 </div>
@@ -346,7 +345,7 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
   <div class="wrapw stack" style="padding-block:18px 120px">
     <section class="objcard">
       <div class="objrow">
-        <div><div class="eyebrow">Objectif an 1</div><div class="objbig"><b>195 960 €</b> HT au 31/03/2027 · 4 diagnostics par mois</div><div class="small">Scénario réaliste HubSpot de mars 2026, à recaler avec la nouvelle grille.</div></div>
+        <div><div class="eyebrow">Objectif an 1</div><div class="objbig" id="obj-resume">Chargement…</div><div class="small">Voir le business plan pour le détail.</div></div>
         <div class="tiles">
           <button class="tile hot" data-scroll="atoi"><b id="k-avals">–</b><span>avals à trancher</span></button>
           <button class="tile" data-scroll="jour"><b id="k-taches">–</b><span>tâches ouvertes</span></button>
@@ -419,58 +418,9 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
 <main>
   <div class="wrap">
 
-    <!-- BUSINESS PLAN -->
+    <!-- BUSINESS PLAN — contenu chargé depuis la base après connexion -->
     <div id="p-plan" class="stack" hidden>
-      <section class="intro">
-        <div class="eyebrow">PROUX AUDIT · SASU en création, immatriculation prévue en janvier 2027</div>
-        <h2 class="big">La machine PROUX AUDIT</h2>
-        <p class="lead">Un cabinet de conseil IT et de Diagnostic Cyber organisé comme une vraie entreprise. Tu es le directeur général. Chaque agent a sa fiche de poste. Chaque initiative passe par le circuit de décision avant ton aval.</p>
-      </section>
-      <div class="cards">
-        <article class="card"><h3>L'offre</h3><p><strong>Diagnostic Cyber PROUX</strong> en abonnement : diagnostic initial, retests périodiques et suivi de la remédiation, en trois formules. Un rapport pour le dirigeant, un rapport technique pour le prestataire.</p><p><strong>Chef de projet IT</strong> : coordination des projets d'infrastructure des clients (exemple : Clinique Éléance).</p><p class="small">Grille de prix en phase de test, choix après le retour de Mickaël PINSON.</p></article>
-        <article class="card"><h3>La cible</h3><p>TPE et PME de moins de 50 salariés, sans service informatique interne, Pays de la Loire d'abord. Secteurs déjà travaillés : santé (cliniques, cabinets), écoles, mairies, agroalimentaire, maisons de retraite.</p></article>
-        <article class="card"><h3>Les canaux</h3><p>Prospection directe à partir d'un test de surface public offert. Prestataires informatiques partenaires : licence de l'outil, rapports co-marqués, commission de 20 %. Distributeur envisagé : ALSO.</p></article>
-        <article class="card"><h3>L'avantage</h3><p><strong>L'indépendance</strong> : PROUX AUDIT n'est ni juge ni partie, il ne vend pas l'infogérance qu'il contrôle. 25 ans d'expérience réseau, un outil propre sans dépendance éditeur, des rapports lisibles par un dirigeant.</p></article>
-        <article class="card"><h3>Le modèle</h3><p>Abonnements récurrents, missions de chef de projet, licences pour les partenaires. Le diagnostic ouvre la porte : il montre les failles, la remédiation et le suivi suivent.</p></article>
-        <article class="card"><h3>L'organisation</h3><p>Toi, directeur général. Alexandre, fondateur adjoint. Sept agents avec fiche de poste. Une base Supabase en guise de cerveau commun, reliée plus tard à celle de RH Project pour le commercial, le site et l'esthétique.</p></article>
-        <article class="card wide"><h3>Les risques et parades</h3>
-          <div class="tbl"><table><thead><tr><th>Risque</th><th>Parade</th></tr></thead><tbody>
-          <tr><td>Crédibilité sans qualification officielle</td><td>Label ExpertCyber après immatriculation, RC Pro couvrant les tests, partenaire qualifié si besoin, rapports de test réels</td></tr>
-          <tr><td>Test réalisé sans autorisation</td><td>Mandat d'autorisation signé avant tout relevé ; avant mandat, uniquement des vérifications publiques</td></tr>
-          <tr><td>Prix mal calibrés</td><td>Avis de Mickaël PINSON, tarifs des concurrents, grilles ajustées pendant la phase de test</td></tr>
-          <tr><td>Dépendance à une seule personne</td><td>Base, fiches de poste et procédures écrites ; agents qui préparent, toi qui valides</td></tr>
-          <tr><td>Manque de temps</td><td>Brief du matin, file d'avals, comité du lundi : quelques minutes par jour</td></tr>
-          </tbody></table></div></article>
-        <article class="card wide"><h3>Les objectifs · an 1, scénario réaliste</h3>
-          <div class="goals">
-            <div class="goal"><b>195 960 €</b><span>chiffre d'affaires an 1 (jusqu'au 31/03/2027)</span></div>
-            <div class="goal"><b>3 900 €</b><span>d'abonnements par mois au 12e mois</span></div>
-            <div class="goal"><b>4</b><span>diagnostics par mois, 3 340 € en moyenne</span></div>
-            <div class="goal"><b>≈ 157 960 €</b><span>résultat cible, charges ≈ 38 000 €</span></div>
-          </div>
-          <p class="small">Source : objectifs HubSpot (flux 1, 2 et 3), établis en mars 2026, avant l'arrêt de SXIPHER et la nouvelle offre en abonnement. À recaler quand la grille de prix sera choisie.</p>
-        </article>
-        <article class="card wide"><h3>Le prévisionnel</h3>
-          <p class="small">Change les chiffres, le total se recalcule. Valeurs de départ : scénario réaliste HubSpot.</p>
-          <div class="calc">
-            <label for="c-missions">Diagnostics par mois<input id="c-missions" type="number" min="0" step="1" value="4"></label>
-            <label for="c-prix">Prix moyen d'un diagnostic (€ HT)<input id="c-prix" type="number" min="0" step="10" value="3340"></label>
-            <label for="c-rem">Remédiation et retests sur l'année (€ HT)<input id="c-rem" type="number" min="0" step="100" value="13540"></label>
-            <label for="c-mrr">Abonnements encaissés sur l'année (€ HT)<input id="c-mrr" type="number" min="0" step="100" value="22100"></label>
-            <label for="c-charges">Charges annuelles (€)<input id="c-charges" type="number" min="0" step="500" value="38000"></label>
-          </div>
-          <div class="tbl"><table class="num"><thead><tr><th>Flux</th><th>Contenu</th><th>An 1 (€ HT)</th></tr></thead><tbody>
-            <tr><td>Flux 1</td><td>Diagnostics ponctuels</td><td id="r-f1"></td></tr>
-            <tr><td>Flux 2</td><td>Remédiation accompagnée, retests, tour 360° apporteur (à partir du 5e mois)</td><td id="r-f2"></td></tr>
-            <tr><td>Flux 3</td><td>Abonnements de suivi</td><td id="r-f3"></td></tr>
-            <tr class="tot"><td colspan="2">Chiffre d'affaires</td><td id="r-ca"></td></tr>
-            <tr><td colspan="2">Charges</td><td id="r-ch"></td></tr>
-            <tr class="tot"><td colspan="2">Résultat avant impôts et rémunération</td><td id="r-res"></td></tr>
-          </tbody></table></div>
-        </article>
-        <article class="card wide"><h3>Les jalons</h3>
-          <ol class="steps"><li><strong>21/10</strong> · Vincent LAFAYE teste le mandat, puis les rapports</li><li><strong>28/10</strong> · Rendez-vous SARECO : facturation avant création, RC Pro</li><li>Test interne chez Hervé, mandat signé</li><li>Présentation à Kevin (ALSO), puis à SD CYBER</li><li>Tests grandeur nature : Olivier BRESSONNEAU (après validation juridique) et 2 clients HubSpot</li><li><strong>Janvier 2027</strong> · Immatriculation de PROUX AUDIT, premières factures</li></ol></article>
-      </div>
+      <div class="empty">Chargement…</div>
     </div>
 
     <!-- BUREAU -->
@@ -526,32 +476,14 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
       <div class="cards" id="fiches"></div>
     </section>
 
-    <!-- CONFORMITE -->
+    <!-- CONFORMITE — contenu chargé depuis la base après connexion -->
     <section id="p-conformite" hidden>
-      <div class="sec-head"><h2>Audit réglementaire</h2><p class="hint">Les points à tenir et leurs solutions. À valider avec l'avocat et l'expert-comptable.</p></div>
-      <div class="tbl"><table><thead><tr><th>Point</th><th>Solution réalisable</th><th>Quand</th><th>Coût</th></tr></thead><tbody>
-        <tr><td><strong>Autorisation des tests</strong> : un relevé sans accord écrit peut être un accès frauduleux à un système</td><td>Mandat d'autorisation signé par le dirigeant avant tout relevé ; avant mandat, uniquement des vérifications publiques (DNS, messagerie)</td><td>Toujours</td><td>0 €</td></tr>
-        <tr><td><strong>Facturation avant création</strong></td><td>Tout en pro forma jusqu'à l'immatriculation ; cadre à valider avec SARECO</td><td>28/10</td><td>0 €</td></tr>
-        <tr><td><strong>Assurance</strong> : les tests peuvent provoquer un incident chez le client</td><td>RC Pro couvrant explicitement les tests d'intrusion et diagnostics</td><td>Avant le 1er test client</td><td>À chiffrer</td></tr>
-        <tr><td><strong>Vocabulaire</strong> : laisser croire à une qualification officielle</td><td>« Diagnostic de sécurité avec validation manuelle » ; jamais « audit certifié »</td><td>Toujours</td><td>0 €</td></tr>
-        <tr><td><strong>Données des clients</strong> : résultats de diagnostic et données de santé</td><td>Convention de confidentialité, base hébergée en Europe (Paris), aucune donnée réelle à un tiers sans accord écrit</td><td>Toujours</td><td>0 €</td></tr>
-        <tr><td><strong>Facturation électronique</strong> : réception obligatoire depuis le 1er septembre 2026, émission à partir du 1er septembre 2027</td><td>Choisir une plateforme agréée au moment de l'immatriculation</td><td>Janvier 2027</td><td>Offre de base</td></tr>
-        <tr><td><strong>Mentions des factures</strong></td><td>SIRET, RCS, TVA, pénalités de retard et indemnité de 40 € : placeholders prêts dans les modèles</td><td>Janvier 2027</td><td>0 €</td></tr>
-        <tr><td><strong>Partenaires</strong></td><td>Contrats d'apporteur et de licence à 20 % signés</td><td>Avant la 1re affaire partenaire</td><td>0 €</td></tr>
-        <tr><td><strong>Marque</strong></td><td>Recherche d'antériorité INPI sur « Diagnostic Cyber PROUX », puis dépôt</td><td>Après immatriculation</td><td>Redevance INPI</td></tr>
-        <tr><td><strong>Prospection par mail</strong></td><td>Expéditeur identifié, lien de désinscription, sources publiques ; pas d'extraction automatique de LinkedIn</td><td>Dès le départ</td><td>0 €</td></tr>
-        <tr><td><strong>Indépendance</strong></td><td>Aucune infogérance dans PROUX AUDIT ; pas d'audit d'une entité qui fait aussi la maintenance</td><td>Toujours</td><td>0 €</td></tr>
-        <tr><td><strong>Agents IA</strong></td><td>À l'extérieur, on signe « PROUX AUDIT » ; un agent qui parle à un client se présente comme assistant IA</td><td>Dès le départ</td><td>0 €</td></tr>
-      </tbody></table></div>
+      <div class="empty">Chargement…</div>
     </section>
 
-    <!-- PLANNING -->
+    <!-- PLANNING — contenu chargé depuis la base après connexion -->
     <section id="p-planning" hidden>
-      <div class="sec-head"><h2>Le planning</h2><p class="hint">Rythme cible. Pour tenir le budget, les agents travaillent à la demande tant que la machine n'est pas rodée.</p></div>
-      <div class="cards">
-        <article class="card"><h3>Une journée type</h3><ol class="steps"><li><strong>7h30</strong> · Brief du matin et file d'avals (Alexandre)</li><li><strong>Matin</strong> · Prospects détectés et qualifiés (Léa)</li><li><strong>12h</strong> · Ton créneau d'appels</li><li><strong>Après-midi</strong> · Relances et propositions (Thomas)</li><li><strong>18h</strong> · HubSpot à jour, ton 2e créneau d'appels</li><li><strong>Soir</strong> · Relecture de ce qui part (Marc), comptes rendus</li></ol></article>
-        <article class="card"><h3>La semaine et le mois</h3><ol class="steps"><li><strong>Lundi</strong> · Comité de direction ; point finances (Emma)</li><li><strong>Vendredi</strong> · Veille juridique (Nora), comptes rendus de la semaine</li><li><strong>1er lundi du mois</strong> · Comité stratégique</li><li><strong>1er du mois</strong> · Bilan chiffré, retests clients à planifier (Julien)</li><li><strong>Dernier vendredi</strong> · Revue des agents : ce qui marche, ce qui change</li></ol></article>
-      </div>
+      <div class="empty">Chargement…</div>
     </section>
 
     <!-- DOSSIERS -->
@@ -567,22 +499,9 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
       <div class="list" id="dossiers"></div>
     </section>
 
-    <!-- OUTILS -->
+    <!-- OUTILS — contenu chargé depuis la base après connexion -->
     <section id="p-outils" hidden>
-      <div class="sec-head"><h2>Les outils</h2><p class="hint">Gratuits ou déjà payés en priorité.</p></div>
-      <div class="tbl"><table><thead><tr><th>Besoin</th><th>Outil</th><th>Coût</th></tr></thead><tbody>
-        <tr><td>Cerveau des agents</td><td>Claude (déjà payé)</td><td>Déjà payé</td></tr>
-        <tr><td>Base commune des agents</td><td>Supabase, projet hébergé à Paris</td><td>0 € (offre gratuite)</td></tr>
-        <tr><td>CRM, affaires, relances</td><td>HubSpot</td><td>Déjà en place</td></tr>
-        <tr><td>Messagerie</td><td>Outlook · audit.proux@outlook.com</td><td>Déjà en place</td></tr>
-        <tr><td>Domaine et site</td><td>prouxaudit.fr chez OVH</td><td>Payé jusqu'en 2029</td></tr>
-        <tr><td>Relevés techniques</td><td>Machine Kali : Nmap, ZAP, Nuclei, puis qualification manuelle</td><td>0 €</td></tr>
-        <tr><td>Restitution</td><td>Outil Diagnostic Cyber PROUX (rapport dirigeant et rapport technique)</td><td>0 €</td></tr>
-        <tr><td>Comptes rendus de réunion</td><td>Plaud</td><td>Déjà en place</td></tr>
-        <tr><td>Documents clients</td><td>Word et PDF aux couleurs PROUX AUDIT</td><td>Déjà en place</td></tr>
-        <tr><td>Données prospects</td><td>Annuaire des entreprises (État), BODACC, BOAMP</td><td>0 €</td></tr>
-        <tr><td>Juridique</td><td>Légifrance, CNIL, Cybermalveillance.gouv.fr, INPI</td><td>0 €</td></tr>
-      </tbody></table></div>
+      <div class="empty">Chargement…</div>
     </section>
 
   </div>
@@ -595,14 +514,6 @@ const SERVER="Supabase", TOOL="execute_sql", PROJECT="fcesspfwfpfxadeodbrj";
 const ST_T={a_faire:"À faire",en_cours:"En cours",fait:"Fait",bloque:"Bloqué"};
 const ST_D={actif:"Actif",attente:"En attente",bloque:"Bloqué",clos:"Clos"};
 const REP={oui:"Oui",non:"Non",a_revoir:"À revoir"};
-const REGLES=`Règles communes de PROUX AUDIT (conseil IT et Diagnostic Cyber pour TPE/PME, Pays de la Loire ; dirigeant : Frédéric PROUX ; immatriculation de la SASU prévue en janvier 2027, tout est en pro forma d'ici là).
-- Tu t'adresses à Frédéric en le tutoyant, en français simple, phrases courtes, sans anglicismes ni sigles non expliqués.
-- Tu ne prétends jamais avoir envoyé un mail, appelé quelqu'un ou modifié HubSpot : tu prépares, Frédéric envoie depuis Outlook (audit.proux@outlook.com).
-- Tout ce qui engage PROUX AUDIT (envoi, prix, devis, engagement) devient un aval que Frédéric valide.
-- Jamais « audit certifié », jamais « PASSI », pas de formules négatives dans les documents clients. Diagnostic de sécurité avec validation manuelle ; mandat signé avant tout relevé actif.
-- i3konnect n'est jamais présenté comme partenaire. PROUX AUDIT est indépendant : ni juge ni partie.
-- Si une information te manque, dis-le simplement au lieu de l'inventer.
-- Objectif an 1 (scénario réaliste fixé en mars 2026, à recaler avec la nouvelle grille) : 195 960 € HT jusqu'au 31/03/2027 = diagnostics ponctuels 160 320 € (4 par mois à 3 340 € en moyenne) + remédiation et retests 13 540 € + abonnements 22 100 € (3 900 € par mois visés au 12e mois) ; charges environ 38 000 €.`;
 let dossierChoisi="";
 let data=null, filtre="ouverts", busy=false, agentOuvert=null, chatBusy=false;
 const ROLES_MEMBRES={commerce_marketing:"Chargée de Marketing & Communication · avec Léa et Thomas"};
@@ -828,7 +739,7 @@ function renderDossiers(){
       ${d.prochaine_action?`<div class="next">${esc(d.prochaine_action)}</div>`:""}
       <details><summary>État et vigilance</summary>${d.etat?`<p>${esc(d.etat)}</p>`:""}${d.vigilance?`<p><strong>Vigilance :</strong> ${esc(d.vigilance)}</p>`:""}</details>
       ${(d.discussions||[]).length?`<details><summary>Discussions Claude liées (${d.discussions.length})</summary><ul class="links">${d.discussions.map(x=>/^https:\/\/claude\.ai\//.test(x.url||"")?`<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.titre)}</a> <span class="mono">${fdate(x.date)}</span></li>`:"").join("")}</ul></details>`:""}
-      <div class="row"><button class="btn" data-act="lock" data-id="${esc(d.id)}">${d.verrouille?"Déverrouiller":"Verrouiller"}</button></div>
+      ${moi&&moi.role==="proprietaire"?`<div class="row"><button class="btn" data-act="lock" data-id="${esc(d.id)}">${d.verrouille?"Déverrouiller":"Verrouiller"}</button></div>`:""}
     </article>`).join(""):`<div class="empty">Aucun dossier dans ce filtre.</div>`;
 }
 
@@ -975,7 +886,7 @@ function calc(){
   const f1=v("c-missions")*v("c-prix")*12, f2=v("c-rem"), f3=v("c-mrr"), ca=f1+f2+f3, ch=v("c-charges");
   $("r-f1").textContent=eur(f1);$("r-f2").textContent=eur(f2);$("r-f3").textContent=eur(f3);$("r-ca").textContent=eur(ca);$("r-ch").textContent="− "+eur(ch);$("r-res").textContent=eur(ca-ch);
 }
-["c-missions","c-prix","c-rem","c-mrr","c-charges"].forEach(id=>$(id).addEventListener("input",calc)); calc();
+function brancherCalc(){["c-missions","c-prix","c-rem","c-mrr","c-charges"].forEach(id=>{const el=$(id);if(el)el.addEventListener("input",calc)});if($("c-missions"))calc()}
 
 let saved=null;try{saved=localStorage.getItem("salle-tab")}catch(e){}
 showTab(saved&&$("p-"+saved)?saved:"plan");
@@ -987,21 +898,21 @@ $("cmd").addEventListener("submit",e=>{e.preventDefault();const id=$("cmd-agent"
 $("cmd-gpt").addEventListener("click",()=>ouvrirChatGPT($("cmd-agent").value,$("cmd-text").value));
 $("cmd-text").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("cmd").requestSubmit()}});
 
+async function chargerPages(){
+  const {data:pages}=await sb.from("pages_internes").select("cle,contenu");
+  if(!pages)return;
+  for(const p of pages){const el=$("p-"+p.cle);if(el){el.innerHTML=p.contenu;if(p.cle==="plan"){brancherCalc();const r=$("obj-resume");if(r)r.innerHTML="<b>195 960 €</b> HT au 31/03/2027 · 4 diagnostics par mois"}}}
+}
 async function demarrer(){
   const {data:{session}}=await sb.auth.getSession();
   $("login").hidden=!!session; document.body.classList.toggle("locked",!session);
-  if(session){$("who").textContent=session.user.email;load()}
+  if(session){$("who").textContent=session.user.email;chargerPages();load()}
 }
 $("login-form").addEventListener("submit",async e=>{
   e.preventDefault(); const em=$("l-email").value.trim(), pw=$("l-pass").value; $("l-msg").textContent="Connexion…";
   const {error}=await sb.auth.signInWithPassword({email:em,password:pw});
   if(error){$("l-msg").textContent=error.message.includes("confirm")?"Adresse pas encore confirmée : ouvre le lien reçu par e-mail, puis reconnecte-toi.":"Identifiants refusés. Vérifie l'adresse et le mot de passe, ou crée ton accès.";return}
   $("l-msg").textContent=""; demarrer();
-});
-$("l-signup").addEventListener("click",async()=>{
-  const em=$("l-email").value.trim(), pw=$("l-pass").value; if(!em||pw.length<8){$("l-msg").textContent="Saisis ton adresse et un mot de passe d'au moins 8 caractères.";return}
-  const {error}=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:location.origin+location.pathname}});
-  $("l-msg").textContent=error?("Création refusée : "+error.message):"Accès créé. Ouvre le lien reçu par e-mail pour confirmer, puis connecte-toi ici.";
 });
 $("btn-logout").addEventListener("click",async()=>{await sb.auth.signOut();location.reload()});
 demarrer();
