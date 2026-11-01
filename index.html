@@ -347,7 +347,7 @@ body.locked .top,body.locked .cmd,body.locked #v-salle,body.locked #v-bureau,bod
       <div class="objrow">
         <div><div class="eyebrow">Objectif an 1</div><div class="objbig" id="obj-resume">Chargement…</div><div class="small">Voir le business plan pour le détail.</div></div>
         <div class="tiles">
-          <button class="tile hot" data-scroll="atoi"><b id="k-avals">–</b><span>avals à trancher</span></button>
+          <button class="tile hot" data-scroll="atoi" id="tile-avals"><b id="k-avals">–</b><span>avals à trancher</span></button>
           <button class="tile" data-scroll="jour"><b id="k-taches">–</b><span>tâches ouvertes</span></button>
           <button class="tile warn" data-scroll="jour"><b id="k-retard">–</b><span>échéances ≤ 7 jours</span></button>
           <button class="tile ok" data-view-go="fond" data-tab-go="dossiers"><b id="k-dossiers">–</b><span>dossiers actifs</span></button>
@@ -518,6 +518,9 @@ let dossierChoisi="";
 let data=null, filtre="ouverts", busy=false, agentOuvert=null, chatBusy=false;
 const ROLES_MEMBRES={commerce_marketing:"Chargée de Marketing & Communication · avec Léa et Thomas"};
 let moi=null, humainOuvert=null;
+const AGENTS_COM=new Set(["commercial","prospection"]);
+const estProprio=()=>moi?.role==="proprietaire";
+const filtreAgent=a=>estProprio()||AGENTS_COM.has(a.id);
 const monMail=()=>(moi?.email||"").toLowerCase();
 const autresHumains=()=>(data?.membres||[]).filter(m=>m.email.toLowerCase()!==monMail());
 const nonLus=em=>(data?.messages||[]).filter(x=>!x.lu&&x.de.toLowerCase()===em.toLowerCase()&&x.a.toLowerCase()===monMail()).length;
@@ -569,10 +572,13 @@ const avClass=i=>["","c1","c2"][i%3];
 
 function render(){
   if(!data)return;
-  const ouvertes=data.taches.filter(t=>t.statut!=="fait"), enAtt=data.avals.filter(a=>!a.reponse);
+  const filt=t=>estProprio()||AGENTS_COM.has(t.agent_id);
+  const ouvertes=data.taches.filter(t=>t.statut!=="fait"&&filt(t)), enAtt=data.avals.filter(a=>!a.reponse);
   const proches=ouvertes.filter(t=>{const d=daysTo(t.pour_quand);return d!==null&&d<=7});
-  $("k-avals").textContent=enAtt.length;$("k-taches").textContent=ouvertes.length;$("k-retard").textContent=proches.length;$("k-dossiers").textContent=data.dossiers.filter(d=>d.statut==="actif").length;
-  $("n-avals").textContent=enAtt.length||"";$("n-dossiers").textContent=data.dossiers.filter(d=>d.statut!=="clos").length;$("n-decisions").textContent=data.decisions.length;
+  $("k-avals").textContent=estProprio()?enAtt.length:"—";$("k-taches").textContent=ouvertes.length;$("k-retard").textContent=proches.length;$("k-dossiers").textContent=data.dossiers.filter(d=>d.statut==="actif"&&(estProprio()||!d.verrouille)).length;
+  $("n-avals").textContent=estProprio()?(enAtt.length||""):"";$("n-dossiers").textContent=data.dossiers.filter(d=>d.statut!=="clos"&&(estProprio()||!d.verrouille)).length;$("n-decisions").textContent=data.decisions.length;
+  if($("tile-avals"))$("tile-avals").hidden=!estProprio();
+  if($("brief-box"))$("brief-box").hidden=!estProprio();
 
   // Brief et comité enregistrés
   const brief=data.notes.find(n=>n.type==="brief"), comite=data.notes.find(n=>n.type==="comite");
@@ -596,6 +602,14 @@ function render(){
   if(brief){$("brief2").innerHTML=md(brief.fait);$("brief-meta2").textContent="Par Alexandre · "+fdt(brief.cree_le)}
   renderAgent(); renderSalle(); renderBureau();
   renderAvals(); renderDossiers();
+  // Masquer les onglets sensibles pour non-proprio
+  const tabsMasques=["plan","pilotage","conformite","outils"];
+  document.querySelectorAll("[data-tab]").forEach(t=>{
+    const tab=t.dataset.tab;
+    if(tabsMasques.includes(tab))t.hidden=!estProprio();
+  });
+  // Si l'onglet actif est masqué, basculer sur organigramme
+  if(!estProprio()){const actif=document.querySelector("[data-tab][aria-selected='true']");if(actif&&tabsMasques.includes(actif.dataset.tab))showTab("bureau")}
   $("fiches").innerHTML=data.agents.map((a,i)=>`<button class="card agentcard" data-agent="${esc(a.id)}" data-goto="1">
     <div class="row"><div class="av ${avClass(i+1)}">${esc(initiale(a.prenom))}</div><div><h3>${esc(a.prenom)}</h3><div class="small">${esc(a.role||a.service)}</div></div></div>
     <p>${esc(a.fiche_de_poste||"")}</p>${a.missions?.length?`<ul>${a.missions.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:""}
@@ -611,8 +625,9 @@ const fjour=d=>d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:
 function renderSalle(){
   const actifs=new Set(data.actifs||[]);
   const ouvertes=data.taches.filter(t=>t.statut!=="fait");
-  // Services
-  $("services").innerHTML=data.agents.map(a=>{const ts=data.taches.filter(t=>t.agent_id===a.id);return `<li><button type="button" data-agent="${esc(a.id)}"><span>${esc(a.service)}</span><span class="cnt">${ts.filter(t=>t.statut==="fait").length}/${ts.length}</span></button></li>`}).join("");
+  // Services (filtrés pour commerce_marketing)
+  const agentsVis=estProprio()?data.agents:data.agents.filter(filtreAgent);
+  $("services").innerHTML=agentsVis.map(a=>{const ts=data.taches.filter(t=>t.agent_id===a.id);return `<li><button type="button" data-agent="${esc(a.id)}"><span>${esc(a.service)}</span><span class="cnt">${ts.filter(t=>t.statut==="fait").length}/${ts.length}</span></button></li>`}).join("");
   // Places autour de la table : Alexandre au centre
   const dir=data.agents.find(x=>!x.rattache_a), eq=data.agents.filter(x=>x.rattache_a);
   const half=Math.ceil(eq.length/2), ordre=[...eq.slice(0,half),dir,...eq.slice(half)].filter(Boolean);
@@ -634,18 +649,20 @@ function renderSalle(){
   $("objectif").innerHTML=`<div class="objrow"><div><h3>Objectif : 4 diagnostics par mois</h3><div class="small">Scénario réaliste an 1 : 195 960 € HT au 31/03/2027, 3 900 € d'abonnements par mois au 12e mois.</div></div>
     <div class="funnel">${st("Prospects détectés",L,100)}${st("Prospects qualifiés",Q,30)}${st("Diagnostics en cours",T,4)}${st("Clients en abonnement",C,12)}</div></div>
     ${L===0?`<div class="alert">Aucun prospect dans la base pour l'instant : Léa n'a pas encore été lancée. Demande-lui de qualifier les leads cyber en attente.</div>`:""}`;
-  // Fil de l'équipe
-  const fil=data.echanges.slice(-12).reverse();
+  // Fil de l'équipe (filtré pour commerce_marketing)
+  const echFilt=estProprio()?data.echanges:data.echanges.filter(e=>AGENTS_COM.has(e.agent_id));
+  const fil=echFilt.slice(-12).reverse();
   $("fil").innerHTML=fil.length?fil.map(e=>{const a=ag(e.agent_id);return `<article class="item"><div class="who2"><div class="av ${GRAD(data.agents.indexOf(a))}" style="color:#fff">${esc(initiale(e.auteur==="frederic"?"F":a?.prenom))}</div><div style="min-width:0"><strong>${e.auteur==="frederic"?"Toi → "+esc(a?.prenom||""):e.auteur==="discussion"?"Discussion Claude → "+esc(a?.prenom||""):esc(a?.prenom||"")}</strong> <span class="small">· ${fdt(e.cree_le)}${e.dossier_id?" · "+esc(dTitre(e.dossier_id)):""}</span><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(e.texte.length>400?e.texte.slice(0,400)+"…":e.texte)}</div></div></div></article>`}).join(""):`<div class="empty">Aucun échange pour l'instant. Choisis un agent dans la barre du bas et pose ta première question.</div>`;
   // Barre de commande
   const sel=$("cmd-agent"), v=sel.value;
-  sel.innerHTML=data.agents.map(a=>`<option value="${esc(a.id)}">À ${esc(a.prenom)}${a===dir?" (il répartit)":" · "+esc(a.service)}</option>`).join("");
-  sel.value=v&&ag(v)?v:(dir?.id||"");
+  const agentsCmd=estProprio()?data.agents:data.agents.filter(filtreAgent);
+  sel.innerHTML=agentsCmd.map(a=>`<option value="${esc(a.id)}">À ${esc(a.prenom)}${a===dir?" (il répartit)":" · "+esc(a.service)}</option>`).join("");
+  sel.value=v&&ag(v)&&(estProprio()||AGENTS_COM.has(v))?v:(agentsCmd[0]?.id||"");
 }
 function renderBureau(){
   const auj=new Date(); auj.setHours(23,59,0,0);
-  const avs=data.avals.filter(v=>!v.reponse).map(v=>({k:"aval",v,urg:daysTo(v.date_limite)??99}));
-  const ts=data.taches.filter(t=>t.statut==="bloque"||(t.statut!=="fait"&&daysTo(t.pour_quand)!==null&&daysTo(t.pour_quand)<=2)).map(t=>({k:"tache",t,urg:daysTo(t.pour_quand)??50}));
+  const avs=estProprio()?data.avals.filter(v=>!v.reponse).map(v=>({k:"aval",v,urg:daysTo(v.date_limite)??99})):[];
+  const ts=data.taches.filter(t=>(estProprio()||AGENTS_COM.has(t.agent_id))&&(t.statut==="bloque"||(t.statut!=="fait"&&daysTo(t.pour_quand)!==null&&daysTo(t.pour_quand)<=2))).map(t=>({k:"tache",t,urg:daysTo(t.pour_quand)??50}));
   const items=[...avs,...ts].sort((x,y)=>x.urg-y.urg);
   $("b-bureau").textContent=items.length; $("b-bureau").hidden=!items.length;
   $("atoi-n").textContent=items.length?items.length+" à traiter":"";
@@ -661,18 +678,19 @@ function renderBureau(){
       <div class="acts"><button class="btn go" data-act="tache" data-id="${t.id}" data-s="fait">C'est fait</button><button class="btn" data-act="demain" data-id="${t.id}">Demain</button><button class="btn" data-act="incompris" data-id="${t.id}">Je ne comprends pas</button></div>
       <details class="reply"><summary>Corriger ou répondre</summary><div class="list" style="margin-top:6px"><textarea id="bur-t-${t.id}" maxlength="1500" placeholder="Ta réponse à ${esc(agentName(t.agent_id))}"></textarea><button class="btn primary" data-act="noter" data-id="${t.id}">Envoyer à ${esc(agentName(t.agent_id))}</button></div></details></article>`}).join("")
     :`<div class="empty">Rien d'urgent. Les avals à trancher et les tâches bloquées ou dues sous 2 jours apparaissent ici, dans l'ordre.</div>`;
-  // Réponses des agents
-  const reps=data.echanges.filter(e=>e.auteur==="agent").slice(-8).reverse();
+  // Réponses des agents (filtrées pour commerce_marketing)
+  const reps=data.echanges.filter(e=>e.auteur==="agent"&&(estProprio()||AGENTS_COM.has(e.agent_id))).slice(-8).reverse();
   $("reponses").innerHTML=reps.length?reps.map(e=>{const a=ag(e.agent_id);return `<article class="item"><div class="row"><strong>${esc(a?.prenom||"")}</strong><span class="small">${fdt(e.cree_le)}</span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px">${esc(e.texte.length>320?e.texte.slice(0,320)+"…":e.texte)}</div><div class="row"><button class="btn" data-agent="${esc(e.agent_id)}">Répondre à ${esc(a?.prenom||"")}</button></div></article>`}).join(""):`<div class="empty">Les réponses des agents apparaîtront ici.</div>`;
-  // Le bureau aujourd'hui, par service
-  const ouvertes=data.taches.filter(t=>t.statut!=="fait");
-  $("jour-list").innerHTML=data.agents.filter(a=>ouvertes.some(t=>t.agent_id===a.id)).map(a=>{const i=data.agents.indexOf(a);const tt=ouvertes.filter(t=>t.agent_id===a.id).sort((x,y)=>(x.pour_quand||"9").localeCompare(y.pour_quand||"9"));return `<article class="item"><div class="svc">${esc(a.service)}</div>${tt.slice(0,4).map(t=>`<div class="who2"><div class="av ${GRAD(i)}" style="color:#fff">${esc(initiale(a.prenom))}</div><div style="min-width:0"><strong>${esc(a.prenom)}</strong> · ${esc(t.quoi)}<div class="small">${t.pour_quand?fdate(t.pour_quand):"sans date"} · ${ST_T[t.statut]}</div></div></div>`).join("")}${tt.length>4?`<button class="btn" data-agent="${esc(a.id)}">+ ${tt.length-4} autre(s)</button>`:""}</article>`}).join("")||`<div class="empty">Aucune tâche ouverte.</div>`;
+  // Le bureau aujourd'hui, par service (filtré pour commerce_marketing)
+  const ouvertes=data.taches.filter(t=>t.statut!=="fait"&&(estProprio()||AGENTS_COM.has(t.agent_id)));
+  $("jour-list").innerHTML=data.agents.filter(a=>(estProprio()||AGENTS_COM.has(a.id))&&ouvertes.some(t=>t.agent_id===a.id)).map(a=>{const i=data.agents.indexOf(a);const tt=ouvertes.filter(t=>t.agent_id===a.id).sort((x,y)=>(x.pour_quand||"9").localeCompare(y.pour_quand||"9"));return `<article class="item"><div class="svc">${esc(a.service)}</div>${tt.slice(0,4).map(t=>`<div class="who2"><div class="av ${GRAD(i)}" style="color:#fff">${esc(initiale(a.prenom))}</div><div style="min-width:0"><strong>${esc(a.prenom)}</strong> · ${esc(t.quoi)}<div class="small">${t.pour_quand?fdate(t.pour_quand):"sans date"} · ${ST_T[t.statut]}</div></div></div>`).join("")}${tt.length>4?`<button class="btn" data-agent="${esc(a.id)}">+ ${tt.length-4} autre(s)</button>`:""}</article>`}).join("")||`<div class="empty">Aucune tâche ouverte.</div>`;
   $("k-leads").textContent=data.nleads||0; $("k-clients").textContent=data.nclients||0;
 }
 function renderDocs(){
   const sa=$("doc-agent"),sd=$("doc-dossier"),va=sa.value,vd=sd.value;
-  sa.innerHTML=data.agents.map(a=>`<option value="${esc(a.id)}">${esc(a.prenom)} · ${esc(a.service)}</option>`).join("");
-  sa.value=va&&ag(va)?va:(ag("commercial")?"commercial":data.agents[0]?.id);
+  const agDoc=estProprio()?data.agents:data.agents.filter(filtreAgent);
+  sa.innerHTML=agDoc.map(a=>`<option value="${esc(a.id)}">${esc(a.prenom)} · ${esc(a.service)}</option>`).join("");
+  sa.value=va&&ag(va)&&(estProprio()||AGENTS_COM.has(va))?va:(ag("commercial")?"commercial":agDoc[0]?.id);
   sd.innerHTML=`<option value="">Aucun en particulier</option>`+data.dossiers.filter(d=>d.statut!=="clos").map(d=>`<option value="${esc(d.id)}">${esc(d.titre)}</option>`).join("");
   sd.value=vd||"";
   const docs=data.documents||[], att=docs.filter(d=>d.statut==="a_analyser").length;
@@ -720,6 +738,7 @@ function tick(){const n=new Date();$("today").textContent=n.toLocaleDateString("
 tick();setInterval(tick,30000);
 
 function renderAvals(){
+  if(!estProprio()){$("avals").innerHTML=`<div class="empty">Les avals sont réservés au dirigeant.</div>`;return}
   $("avals").innerHTML=data.avals.length?data.avals.map(a=>`
     <article class="item ${!a.reponse?"urgent":""}">
       <div class="row"><span class="title">${esc(a.demande)}</span>${a.reponse?`<span class="pill ${a.reponse}">${REP[a.reponse]}</span>`:""}</div>
@@ -731,7 +750,7 @@ function renderAvals(){
     </article>`).join(""):`<div class="empty">Aucun aval en attente. Quand un agent prépare un envoi, un prix ou un devis, il apparaît ici pour ta décision.</div>`;
 }
 function renderDossiers(){
-  const ds=data.dossiers.filter(d=>filtre==="ouverts"?d.statut!=="clos":d.statut===filtre);
+  const ds=data.dossiers.filter(d=>(estProprio()||!d.verrouille)&&(filtre==="ouverts"?d.statut!=="clos":d.statut===filtre));
   $("dossiers").innerHTML=ds.length?ds.map(d=>`
     <article class="item ${d.priorite===1&&d.statut!=="clos"?"urgent":""}">
       <div class="row">${d.priorite?`<span class="prio p${d.priorite}">P${d.priorite}</span>`:""}<span class="title">${esc(d.titre)}</span><span class="pill ${d.statut}">${ST_D[d.statut]||d.statut}</span>${d.verrouille?`<span class="lock">Verrouillé</span>`:""}</div>
